@@ -37,7 +37,7 @@ Our model can be found in `pyiqa/archs/gamma_arch.py`
 
 ## Usage
 
-Our gamma can be used as a ready-made image evaluation model. Please download the pretrained gamma weight.
+Our gamma can be used as a ready-made image evaluation model. Please download the pretrained gamma weight and see file `infer_demo/infer.py`.
 ```
 cd infer_demo
 python infer.py
