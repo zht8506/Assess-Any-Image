@@ -1,4 +1,4 @@
-# Gamma: Toward Generic Image Assessment with Mixture of Assessment Experts
+# Gamma: Toward Generic Image Assessment with Mixture of Assessment Experts [paper](https://arxiv.org/pdf/2503.06678)
 
 ## :loudspeaker: Abstract
 
