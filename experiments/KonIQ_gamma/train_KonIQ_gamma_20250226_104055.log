@@ -1,0 +1,1299 @@
+2025-02-26 10:40:55,784 INFO: 
+Version Information: 
+	PyTorch: 1.12.1+cu113
+	TorchVision: 0.13.1+cu113
+2025-02-26 10:40:55,785 INFO: 
+  name: KonIQ_gamma
+  model_type: GeneralIQAModel
+  num_gpu: 1
+  manual_seed: 123
+  datasets:[
+    train:[
+      name: KonIQ10k
+      type: GeneralNRDataset
+      dataroot_target: /data/iqa_iaa_data/iqa_data/koniq10k/512x384
+      meta_info_file: ./datasets/meta_info/meta_info_KonIQ10kDataset.csv
+      split_file: ./datasets/meta_info/koniq_10split.pkl
+      mos_range: [0, 100]
+      lower_better: False
+      mos_normalize: True
+      split_index: 1
+      augment:[
+        hflip: True
+        random_crop: 224
+      ]
+      img_range: 1
+      use_shuffle: True
+      num_worker_per_gpu: 4
+      batch_size_per_gpu: 8
+      dataset_enlarge_ratio: 1
+      prefetch_mode: None
+      phase: train
+    ]
+    val:[
+      name: KonIQ10k
+      type: GeneralNRDataset
+      dataroot_target: /data/iqa_iaa_data/iqa_data/koniq10k/512x384
+      meta_info_file: ./datasets/meta_info/meta_info_KonIQ10kDataset.csv
+      split_file: ./datasets/meta_info/koniq_10split.pkl
+      mos_range: [0, 100]
+      lower_better: False
+      mos_normalize: True
+      split_index: 1
+      num_worker_per_gpu: 4
+      batch_size_per_gpu: 16
+      phase: val
+    ]
+  ]
+  network:[
+    type: Gamma_MoAE
+    model_type: CLIP_Adapter_prompt
+    backbone: /data/zht/Gamma-github/pretrained_weight/UniQA_weight.pt
+    pretrained: False
+    pos_embedding: True
+    sample_size: 224
+    clip_finetune: True
+  ]
+  path:[
+    pretrain_network_g: None
+    strict_load_g: True
+    resume_state: None
+    experiments_root: /data/zht/Gamma-github/experiments/KonIQ_gamma
+    models: /data/zht/Gamma-github/experiments/KonIQ_gamma/models
+    training_states: /data/zht/Gamma-github/experiments/KonIQ_gamma/training_states
+    log: /data/zht/Gamma-github/experiments/KonIQ_gamma
+    visualization: /data/zht/Gamma-github/experiments/KonIQ_gamma/visualization
+  ]
+  train:[
+    optim:[
+      type: Adam
+      lr: 0.0002
+    ]
+    scheduler:[
+      type: CosineAnnealingLR
+      T_max: 20
+      eta_min: 0
+    ]
+    total_iter: 2000000
+    total_epoch: 20
+    warmup_iter: -1
+    mos_loss_opt:[
+      type: MSELoss
+      loss_weight: 1.0
+    ]
+  ]
+  val:[
+    val_type: epoch
+    val_freq_epoch: 2
+    val_freq: 200.0
+    save_img: False
+    pbar: True
+    key_metric: srcc
+    metrics:[
+      srcc:[
+        type: calculate_srcc
+      ]
+      plcc:[
+        type: calculate_plcc
+      ]
+    ]
+  ]
+  logger:[
+    print_freq: 100
+    save_latest_freq: 1000.0
+    log_imgs_freq: 1000
+    use_tb_logger: True
+    wandb:[
+      project: None
+      resume_id: None
+    ]
+  ]
+  dist_params:[
+    backend: nccl
+    port: 29500
+  ]
+  find_unused_parameters: True
+  dist: False
+  rank: 0
+  world_size: 1
+  auto_resume: False
+  is_train: True
+  root_path: /data/zht/Gamma-github
+  split_index: 1
+
+2025-02-26 10:40:56,009 INFO: mos_label is normalized from [0, 100], lower_better[False] to [0, 1], lower_better[False(higher better)].
+2025-02-26 10:40:56,016 INFO: Dataset [GeneralNRDataset] - KonIQ10k is built.
+2025-02-26 10:40:56,016 INFO: Training statistics:
+	Number of train images: 8058
+	Dataset enlarge ratio: 1
+	Batch size per gpu: 8
+	World size (gpu number): 1
+	Require iter number per epoch: 1008
+	Total epochs: 20; iters: 20160.
+2025-02-26 10:40:56,080 INFO: mos_label is normalized from [0, 100], lower_better[False] to [0, 1], lower_better[False(higher better)].
+2025-02-26 10:40:56,086 INFO: Dataset [GeneralNRDataset] - KonIQ10k is built.
+2025-02-26 10:40:56,087 INFO: Number of val images/folders in KonIQ10k: 2015
+2025-02-26 10:42:09,857 INFO: Network [Gamma_MoAE] is created.
+2025-02-26 10:42:12,624 INFO: Network: Gamma_MoAE, with parameters: 272,704,566
+2025-02-26 10:42:12,624 INFO: Gamma_MoAE(
+  (clip_model): CLIPmoe_Adapter_model(
+    (visual): VisionTransformer(
+      (conv1): Conv2d(3, 768, kernel_size=(16, 16), stride=(16, 16), bias=False)
+      (ln_pre): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+      (transformer): Transformer(
+        (resblocks): Sequential(
+          (0): ResidualAttentionBlock(
+            (attn): MultiheadAttention(
+              (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+            )
+            (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (mlp): Sequential(
+              (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+              (gelu): QuickGELU()
+              (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+            )
+            (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          )
+          (1): ResidualAttentionBlock(
+            (attn): MultiheadAttention(
+              (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+            )
+            (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (mlp): Sequential(
+              (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+              (gelu): QuickGELU()
+              (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+            )
+            (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          )
+          (2): ResidualAttentionBlock(
+            (attn): MultiheadAttention(
+              (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+            )
+            (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (mlp): Sequential(
+              (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+              (gelu): QuickGELU()
+              (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+            )
+            (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          )
+          (3): ResidualAttentionBlock(
+            (attn): MultiheadAttention(
+              (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+            )
+            (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (mlp): Sequential(
+              (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+              (gelu): QuickGELU()
+              (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+            )
+            (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          )
+          (4): ResidualAttentionBlock(
+            (attn): MultiheadAttention(
+              (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+            )
+            (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (mlp): Sequential(
+              (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+              (gelu): QuickGELU()
+              (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+            )
+            (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          )
+          (5): ResidualAttentionBlock(
+            (attn): MultiheadAttention(
+              (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+            )
+            (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (mlp): Sequential(
+              (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+              (gelu): QuickGELU()
+              (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+            )
+            (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          )
+          (6): ResidualAttentionBlock(
+            (attn): MultiheadAttention(
+              (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+            )
+            (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (mlp): MoE_clip(
+              (useful_experts): Sequential(
+                (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+              )
+              (experts): ModuleDict(
+                (expert_0): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+                (expert_1): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+                (expert_2): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+              )
+              (gating): Gating(
+                (layer1): Linear(in_features=768, out_features=3, bias=True)
+              )
+            )
+            (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          )
+          (7): ResidualAttentionBlock(
+            (attn): MultiheadAttention(
+              (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+            )
+            (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (mlp): MoE_clip(
+              (useful_experts): Sequential(
+                (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+              )
+              (experts): ModuleDict(
+                (expert_0): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+                (expert_1): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+                (expert_2): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+              )
+              (gating): Gating(
+                (layer1): Linear(in_features=768, out_features=3, bias=True)
+              )
+            )
+            (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          )
+          (8): ResidualAttentionBlock(
+            (attn): MultiheadAttention(
+              (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+            )
+            (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (mlp): MoE_clip(
+              (useful_experts): Sequential(
+                (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+              )
+              (experts): ModuleDict(
+                (expert_0): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+                (expert_1): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+                (expert_2): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+              )
+              (gating): Gating(
+                (layer1): Linear(in_features=768, out_features=3, bias=True)
+              )
+            )
+            (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          )
+          (9): ResidualAttentionBlock(
+            (attn): MultiheadAttention(
+              (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+            )
+            (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (mlp): MoE_clip(
+              (useful_experts): Sequential(
+                (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+              )
+              (experts): ModuleDict(
+                (expert_0): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+                (expert_1): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+                (expert_2): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+              )
+              (gating): Gating(
+                (layer1): Linear(in_features=768, out_features=3, bias=True)
+              )
+            )
+            (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          )
+          (10): ResidualAttentionBlock(
+            (attn): MultiheadAttention(
+              (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+            )
+            (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (mlp): MoE_clip(
+              (useful_experts): Sequential(
+                (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+              )
+              (experts): ModuleDict(
+                (expert_0): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+                (expert_1): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+                (expert_2): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+              )
+              (gating): Gating(
+                (layer1): Linear(in_features=768, out_features=3, bias=True)
+              )
+            )
+            (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          )
+          (11): ResidualAttentionBlock(
+            (attn): MultiheadAttention(
+              (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+            )
+            (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (mlp): MoE_clip(
+              (useful_experts): Sequential(
+                (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+              )
+              (experts): ModuleDict(
+                (expert_0): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+                (expert_1): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+                (expert_2): Sequential(
+                  (c_fc): Linear(in_features=768, out_features=3072, bias=True)
+                  (gelu): QuickGELU()
+                  (c_proj): Linear(in_features=3072, out_features=768, bias=True)
+                )
+              )
+              (gating): Gating(
+                (layer1): Linear(in_features=768, out_features=3, bias=True)
+              )
+            )
+            (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          )
+        )
+      )
+      (ln_post): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+    )
+    (transformer): Transformer(
+      (resblocks): Sequential(
+        (0): ResidualAttentionBlock(
+          (attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          )
+          (ln_1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (mlp): Sequential(
+            (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+            (gelu): QuickGELU()
+            (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+          )
+          (ln_2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        )
+        (1): ResidualAttentionBlock(
+          (attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          )
+          (ln_1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (mlp): Sequential(
+            (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+            (gelu): QuickGELU()
+            (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+          )
+          (ln_2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        )
+        (2): ResidualAttentionBlock(
+          (attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          )
+          (ln_1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (mlp): Sequential(
+            (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+            (gelu): QuickGELU()
+            (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+          )
+          (ln_2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        )
+        (3): ResidualAttentionBlock(
+          (attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          )
+          (ln_1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (mlp): Sequential(
+            (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+            (gelu): QuickGELU()
+            (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+          )
+          (ln_2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        )
+        (4): ResidualAttentionBlock(
+          (attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          )
+          (ln_1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (mlp): Sequential(
+            (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+            (gelu): QuickGELU()
+            (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+          )
+          (ln_2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        )
+        (5): ResidualAttentionBlock(
+          (attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          )
+          (ln_1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (mlp): Sequential(
+            (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+            (gelu): QuickGELU()
+            (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+          )
+          (ln_2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        )
+        (6): ResidualAttentionBlock(
+          (attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          )
+          (ln_1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (mlp): MoE_clip(
+            (useful_experts): Sequential(
+              (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+              (gelu): QuickGELU()
+              (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+            )
+            (experts): ModuleDict(
+              (expert_0): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+              (expert_1): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+              (expert_2): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+            )
+            (gating): Gating(
+              (layer1): Linear(in_features=512, out_features=3, bias=True)
+            )
+          )
+          (ln_2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        )
+        (7): ResidualAttentionBlock(
+          (attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          )
+          (ln_1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (mlp): MoE_clip(
+            (useful_experts): Sequential(
+              (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+              (gelu): QuickGELU()
+              (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+            )
+            (experts): ModuleDict(
+              (expert_0): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+              (expert_1): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+              (expert_2): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+            )
+            (gating): Gating(
+              (layer1): Linear(in_features=512, out_features=3, bias=True)
+            )
+          )
+          (ln_2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        )
+        (8): ResidualAttentionBlock(
+          (attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          )
+          (ln_1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (mlp): MoE_clip(
+            (useful_experts): Sequential(
+              (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+              (gelu): QuickGELU()
+              (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+            )
+            (experts): ModuleDict(
+              (expert_0): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+              (expert_1): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+              (expert_2): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+            )
+            (gating): Gating(
+              (layer1): Linear(in_features=512, out_features=3, bias=True)
+            )
+          )
+          (ln_2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        )
+        (9): ResidualAttentionBlock(
+          (attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          )
+          (ln_1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (mlp): MoE_clip(
+            (useful_experts): Sequential(
+              (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+              (gelu): QuickGELU()
+              (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+            )
+            (experts): ModuleDict(
+              (expert_0): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+              (expert_1): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+              (expert_2): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+            )
+            (gating): Gating(
+              (layer1): Linear(in_features=512, out_features=3, bias=True)
+            )
+          )
+          (ln_2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        )
+        (10): ResidualAttentionBlock(
+          (attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          )
+          (ln_1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (mlp): MoE_clip(
+            (useful_experts): Sequential(
+              (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+              (gelu): QuickGELU()
+              (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+            )
+            (experts): ModuleDict(
+              (expert_0): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+              (expert_1): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+              (expert_2): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+            )
+            (gating): Gating(
+              (layer1): Linear(in_features=512, out_features=3, bias=True)
+            )
+          )
+          (ln_2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        )
+        (11): ResidualAttentionBlock(
+          (attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          )
+          (ln_1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (mlp): MoE_clip(
+            (useful_experts): Sequential(
+              (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+              (gelu): QuickGELU()
+              (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+            )
+            (experts): ModuleDict(
+              (expert_0): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+              (expert_1): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+              (expert_2): Sequential(
+                (c_fc): Linear(in_features=512, out_features=2048, bias=True)
+                (gelu): QuickGELU()
+                (c_proj): Linear(in_features=2048, out_features=512, bias=True)
+              )
+            )
+            (gating): Gating(
+              (layer1): Linear(in_features=512, out_features=3, bias=True)
+            )
+          )
+          (ln_2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        )
+      )
+    )
+    (token_embedding): Embedding(49408, 512)
+    (ln_final): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+  )
+  (adapter): Adapter(
+    (fc): Sequential(
+      (0): Linear(in_features=512, out_features=256, bias=False)
+      (1): ReLU(inplace=True)
+      (2): Linear(in_features=256, out_features=512, bias=False)
+      (3): ReLU(inplace=True)
+    )
+  )
+)
+2025-02-26 10:44:02,223 INFO: Network [Gamma_MoAE] is created.
+2025-02-26 10:44:02,703 INFO: Loss [MSELoss] is created.
+2025-02-26 10:44:02,707 WARNING: Params clip_model.positional_embedding will not be optimized.
+2025-02-26 10:44:02,707 WARNING: Params clip_model.text_projection will not be optimized.
+2025-02-26 10:44:02,707 WARNING: Params clip_model.logit_scale will not be optimized.
+2025-02-26 10:44:02,707 WARNING: Params clip_model.visual.class_embedding will not be optimized.
+2025-02-26 10:44:02,707 WARNING: Params clip_model.visual.positional_embedding will not be optimized.
+2025-02-26 10:44:02,707 WARNING: Params clip_model.visual.proj will not be optimized.
+2025-02-26 10:44:02,707 WARNING: Params clip_model.visual.conv1.weight will not be optimized.
+2025-02-26 10:44:02,707 WARNING: Params clip_model.visual.ln_pre.weight will not be optimized.
+2025-02-26 10:44:02,707 WARNING: Params clip_model.visual.ln_pre.bias will not be optimized.
+2025-02-26 10:44:02,707 WARNING: Params clip_model.visual.transformer.resblocks.0.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,707 WARNING: Params clip_model.visual.transformer.resblocks.0.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,707 WARNING: Params clip_model.visual.transformer.resblocks.0.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.0.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.0.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.0.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.0.mlp.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.0.mlp.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.0.mlp.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.0.mlp.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.0.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.0.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.1.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.1.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.1.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.1.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.1.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,708 WARNING: Params clip_model.visual.transformer.resblocks.1.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.1.mlp.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.1.mlp.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.1.mlp.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.1.mlp.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.1.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.1.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.2.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.2.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.2.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.2.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.2.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.2.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.2.mlp.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,709 WARNING: Params clip_model.visual.transformer.resblocks.2.mlp.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.2.mlp.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.2.mlp.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.2.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.2.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.3.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.3.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.3.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.3.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.3.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.3.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.3.mlp.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.3.mlp.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.3.mlp.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.3.mlp.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,710 WARNING: Params clip_model.visual.transformer.resblocks.3.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,711 WARNING: Params clip_model.visual.transformer.resblocks.3.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,711 WARNING: Params clip_model.visual.transformer.resblocks.4.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,711 WARNING: Params clip_model.visual.transformer.resblocks.4.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,711 WARNING: Params clip_model.visual.transformer.resblocks.4.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,711 WARNING: Params clip_model.visual.transformer.resblocks.4.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,711 WARNING: Params clip_model.visual.transformer.resblocks.4.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,711 WARNING: Params clip_model.visual.transformer.resblocks.4.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,711 WARNING: Params clip_model.visual.transformer.resblocks.4.mlp.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,711 WARNING: Params clip_model.visual.transformer.resblocks.4.mlp.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,711 WARNING: Params clip_model.visual.transformer.resblocks.4.mlp.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,712 WARNING: Params clip_model.visual.transformer.resblocks.4.mlp.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,712 WARNING: Params clip_model.visual.transformer.resblocks.4.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,712 WARNING: Params clip_model.visual.transformer.resblocks.4.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,712 WARNING: Params clip_model.visual.transformer.resblocks.5.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,712 WARNING: Params clip_model.visual.transformer.resblocks.5.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,712 WARNING: Params clip_model.visual.transformer.resblocks.5.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,712 WARNING: Params clip_model.visual.transformer.resblocks.5.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,712 WARNING: Params clip_model.visual.transformer.resblocks.5.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,712 WARNING: Params clip_model.visual.transformer.resblocks.5.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,712 WARNING: Params clip_model.visual.transformer.resblocks.5.mlp.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,712 WARNING: Params clip_model.visual.transformer.resblocks.5.mlp.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,713 WARNING: Params clip_model.visual.transformer.resblocks.5.mlp.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,713 WARNING: Params clip_model.visual.transformer.resblocks.5.mlp.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,713 WARNING: Params clip_model.visual.transformer.resblocks.5.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,713 WARNING: Params clip_model.visual.transformer.resblocks.5.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,713 WARNING: Params clip_model.visual.transformer.resblocks.6.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,713 WARNING: Params clip_model.visual.transformer.resblocks.6.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,713 WARNING: Params clip_model.visual.transformer.resblocks.6.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,713 WARNING: Params clip_model.visual.transformer.resblocks.6.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,713 WARNING: Params clip_model.visual.transformer.resblocks.6.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,713 WARNING: Params clip_model.visual.transformer.resblocks.6.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,713 WARNING: Params clip_model.visual.transformer.resblocks.6.mlp.useful_experts.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,714 WARNING: Params clip_model.visual.transformer.resblocks.6.mlp.useful_experts.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,714 WARNING: Params clip_model.visual.transformer.resblocks.6.mlp.useful_experts.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,714 WARNING: Params clip_model.visual.transformer.resblocks.6.mlp.useful_experts.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,714 WARNING: Params clip_model.visual.transformer.resblocks.6.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,714 WARNING: Params clip_model.visual.transformer.resblocks.6.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,714 WARNING: Params clip_model.visual.transformer.resblocks.7.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,714 WARNING: Params clip_model.visual.transformer.resblocks.7.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,714 WARNING: Params clip_model.visual.transformer.resblocks.7.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,714 WARNING: Params clip_model.visual.transformer.resblocks.7.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,714 WARNING: Params clip_model.visual.transformer.resblocks.7.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,714 WARNING: Params clip_model.visual.transformer.resblocks.7.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,715 WARNING: Params clip_model.visual.transformer.resblocks.7.mlp.useful_experts.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,715 WARNING: Params clip_model.visual.transformer.resblocks.7.mlp.useful_experts.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,715 WARNING: Params clip_model.visual.transformer.resblocks.7.mlp.useful_experts.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,715 WARNING: Params clip_model.visual.transformer.resblocks.7.mlp.useful_experts.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,715 WARNING: Params clip_model.visual.transformer.resblocks.7.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,715 WARNING: Params clip_model.visual.transformer.resblocks.7.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,715 WARNING: Params clip_model.visual.transformer.resblocks.8.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,715 WARNING: Params clip_model.visual.transformer.resblocks.8.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,715 WARNING: Params clip_model.visual.transformer.resblocks.8.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,715 WARNING: Params clip_model.visual.transformer.resblocks.8.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,716 WARNING: Params clip_model.visual.transformer.resblocks.8.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,716 WARNING: Params clip_model.visual.transformer.resblocks.8.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,716 WARNING: Params clip_model.visual.transformer.resblocks.8.mlp.useful_experts.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,716 WARNING: Params clip_model.visual.transformer.resblocks.8.mlp.useful_experts.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,716 WARNING: Params clip_model.visual.transformer.resblocks.8.mlp.useful_experts.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,716 WARNING: Params clip_model.visual.transformer.resblocks.8.mlp.useful_experts.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,716 WARNING: Params clip_model.visual.transformer.resblocks.8.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,716 WARNING: Params clip_model.visual.transformer.resblocks.8.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,716 WARNING: Params clip_model.visual.transformer.resblocks.9.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,716 WARNING: Params clip_model.visual.transformer.resblocks.9.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,716 WARNING: Params clip_model.visual.transformer.resblocks.9.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,716 WARNING: Params clip_model.visual.transformer.resblocks.9.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.9.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.9.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.9.mlp.useful_experts.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.9.mlp.useful_experts.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.9.mlp.useful_experts.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.9.mlp.useful_experts.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.9.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.9.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.10.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.10.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.10.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.10.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.10.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,717 WARNING: Params clip_model.visual.transformer.resblocks.10.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.10.mlp.useful_experts.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.10.mlp.useful_experts.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.10.mlp.useful_experts.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.10.mlp.useful_experts.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.10.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.10.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.11.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.11.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.11.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.11.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.11.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.11.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.11.mlp.useful_experts.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.11.mlp.useful_experts.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,718 WARNING: Params clip_model.visual.transformer.resblocks.11.mlp.useful_experts.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.visual.transformer.resblocks.11.mlp.useful_experts.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.visual.transformer.resblocks.11.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.visual.transformer.resblocks.11.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.visual.ln_post.weight will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.visual.ln_post.bias will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.transformer.resblocks.0.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.transformer.resblocks.0.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.transformer.resblocks.0.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.transformer.resblocks.0.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.transformer.resblocks.0.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.transformer.resblocks.0.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.transformer.resblocks.0.mlp.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.transformer.resblocks.0.mlp.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,719 WARNING: Params clip_model.transformer.resblocks.0.mlp.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.0.mlp.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.0.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.0.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.1.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.1.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.1.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.1.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.1.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.1.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.1.mlp.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.1.mlp.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.1.mlp.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.1.mlp.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.1.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.1.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,720 WARNING: Params clip_model.transformer.resblocks.2.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.2.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.2.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.2.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.2.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.2.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.2.mlp.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.2.mlp.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.2.mlp.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.2.mlp.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.2.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.2.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.3.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.3.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.3.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,721 WARNING: Params clip_model.transformer.resblocks.3.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.3.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.3.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.3.mlp.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.3.mlp.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.3.mlp.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.3.mlp.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.3.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.3.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.4.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.4.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.4.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.4.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.4.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,722 WARNING: Params clip_model.transformer.resblocks.4.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.4.mlp.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.4.mlp.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.4.mlp.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.4.mlp.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.4.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.4.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.5.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.5.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.5.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.5.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.5.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.5.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.5.mlp.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.5.mlp.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,723 WARNING: Params clip_model.transformer.resblocks.5.mlp.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.5.mlp.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.5.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.5.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.6.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.6.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.6.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.6.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.6.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.6.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.6.mlp.useful_experts.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.6.mlp.useful_experts.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.6.mlp.useful_experts.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.6.mlp.useful_experts.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.6.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,724 WARNING: Params clip_model.transformer.resblocks.6.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.7.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.7.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.7.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.7.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.7.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.7.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.7.mlp.useful_experts.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.7.mlp.useful_experts.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.7.mlp.useful_experts.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.7.mlp.useful_experts.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.7.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.7.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.8.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.8.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.8.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,725 WARNING: Params clip_model.transformer.resblocks.8.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.8.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.8.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.8.mlp.useful_experts.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.8.mlp.useful_experts.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.8.mlp.useful_experts.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.8.mlp.useful_experts.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.8.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.8.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.9.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.9.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.9.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.9.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.9.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,726 WARNING: Params clip_model.transformer.resblocks.9.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.9.mlp.useful_experts.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.9.mlp.useful_experts.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.9.mlp.useful_experts.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.9.mlp.useful_experts.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.9.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.9.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.10.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.10.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.10.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.10.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.10.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.10.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.10.mlp.useful_experts.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,727 WARNING: Params clip_model.transformer.resblocks.10.mlp.useful_experts.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.10.mlp.useful_experts.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.10.mlp.useful_experts.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.10.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.10.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.11.attn.in_proj_weight will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.11.attn.in_proj_bias will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.11.attn.out_proj.weight will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.11.attn.out_proj.bias will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.11.ln_1.weight will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.11.ln_1.bias will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.11.mlp.useful_experts.c_fc.weight will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.11.mlp.useful_experts.c_fc.bias will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.11.mlp.useful_experts.c_proj.weight will not be optimized.
+2025-02-26 10:44:02,728 WARNING: Params clip_model.transformer.resblocks.11.mlp.useful_experts.c_proj.bias will not be optimized.
+2025-02-26 10:44:02,729 WARNING: Params clip_model.transformer.resblocks.11.ln_2.weight will not be optimized.
+2025-02-26 10:44:02,729 WARNING: Params clip_model.transformer.resblocks.11.ln_2.bias will not be optimized.
+2025-02-26 10:44:02,729 WARNING: Params clip_model.token_embedding.weight will not be optimized.
+2025-02-26 10:44:02,729 WARNING: Params clip_model.ln_final.weight will not be optimized.
+2025-02-26 10:44:02,729 WARNING: Params clip_model.ln_final.bias will not be optimized.
+2025-02-26 10:44:02,730 INFO: Model [GeneralIQAModel] is created.
+2025-02-26 10:44:03,139 INFO: Start training from epoch: 0, iter: 0
+2025-02-26 10:44:22,578 INFO: [KonIQ..][epoch:  0, iter:     100, lr:(2.000e-04,)] [eta: 0:50:02, time (data): 0.194 (0.009)] l_mos: 2.9954e-03 train_metrics/srcc: 8.0952e-01 train_metrics/plcc: 9.6043e-01 
+2025-02-26 10:44:37,904 INFO: [KonIQ..][epoch:  0, iter:     200, lr:(2.000e-04,)] [eta: 0:50:22, time (data): 0.174 (0.006)] l_mos: 3.2572e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.0907e-01 
+2025-02-26 10:44:53,246 INFO: [KonIQ..][epoch:  0, iter:     300, lr:(2.000e-04,)] [eta: 0:50:20, time (data): 0.153 (0.003)] l_mos: 2.0087e-03 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.1586e-01 
+2025-02-26 10:45:08,643 INFO: [KonIQ..][epoch:  0, iter:     400, lr:(2.000e-04,)] [eta: 0:50:14, time (data): 0.154 (0.003)] l_mos: 8.7919e-03 train_metrics/srcc: 8.0952e-01 train_metrics/plcc: 9.5835e-01 
+2025-02-26 10:45:23,950 INFO: [KonIQ..][epoch:  0, iter:     500, lr:(2.000e-04,)] [eta: 0:50:01, time (data): 0.153 (0.003)] l_mos: 2.8148e-03 train_metrics/srcc: 6.9048e-01 train_metrics/plcc: 7.9164e-01 
+2025-02-26 10:45:39,405 INFO: [KonIQ..][epoch:  0, iter:     600, lr:(2.000e-04,)] [eta: 0:49:52, time (data): 0.154 (0.003)] l_mos: 3.1131e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.6315e-01 
+2025-02-26 10:45:54,780 INFO: [KonIQ..][epoch:  0, iter:     700, lr:(2.000e-04,)] [eta: 0:49:39, time (data): 0.154 (0.003)] l_mos: 4.5451e-03 train_metrics/srcc: 6.1905e-01 train_metrics/plcc: 8.5952e-01 
+2025-02-26 10:46:10,081 INFO: [KonIQ..][epoch:  0, iter:     800, lr:(2.000e-04,)] [eta: 0:49:23, time (data): 0.153 (0.003)] l_mos: 1.7610e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.8837e-01 
+2025-02-26 10:46:25,730 INFO: [KonIQ..][epoch:  0, iter:     900, lr:(2.000e-04,)] [eta: 0:49:14, time (data): 0.156 (0.003)] l_mos: 2.2137e-03 train_metrics/srcc: 5.2381e-01 train_metrics/plcc: 9.1746e-01 
+2025-02-26 10:46:41,352 INFO: [KonIQ..][epoch:  0, iter:   1,000, lr:(2.000e-04,)] [eta: 0:49:05, time (data): 0.156 (0.003)] l_mos: 4.0075e-03 train_metrics/srcc: 5.4762e-01 train_metrics/plcc: 9.3149e-01 
+2025-02-26 10:46:41,353 INFO: Saving latest models and training states.
+2025-02-26 10:46:59,421 INFO: [KonIQ..][epoch:  1, iter:   1,100, lr:(1.988e-04,)] [eta: 0:49:36, time (data): 0.159 (0.009)] l_mos: 2.0892e-03 train_metrics/srcc: 8.8095e-01 train_metrics/plcc: 9.6730e-01 
+2025-02-26 10:47:14,953 INFO: [KonIQ..][epoch:  1, iter:   1,200, lr:(1.988e-04,)] [eta: 0:49:19, time (data): 0.157 (0.006)] l_mos: 9.2249e-04 train_metrics/srcc: 8.8095e-01 train_metrics/plcc: 9.3935e-01 
+2025-02-26 10:47:32,332 INFO: [KonIQ..][epoch:  1, iter:   1,300, lr:(1.988e-04,)] [eta: 0:49:29, time (data): 0.173 (0.008)] l_mos: 3.4567e-03 train_metrics/srcc: 6.1905e-01 train_metrics/plcc: 6.7981e-01 
+2025-02-26 10:47:48,417 INFO: [KonIQ..][epoch:  1, iter:   1,400, lr:(1.988e-04,)] [eta: 0:49:18, time (data): 0.167 (0.007)] l_mos: 1.7950e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.5434e-01 
+2025-02-26 10:48:03,828 INFO: [KonIQ..][epoch:  1, iter:   1,500, lr:(1.988e-04,)] [eta: 0:48:58, time (data): 0.154 (0.003)] l_mos: 1.4250e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.8929e-01 
+2025-02-26 10:48:19,186 INFO: [KonIQ..][epoch:  1, iter:   1,600, lr:(1.988e-04,)] [eta: 0:48:38, time (data): 0.154 (0.003)] l_mos: 5.4004e-03 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 8.7672e-01 
+2025-02-26 10:48:34,585 INFO: [KonIQ..][epoch:  1, iter:   1,700, lr:(1.988e-04,)] [eta: 0:48:18, time (data): 0.154 (0.003)] l_mos: 1.5029e-03 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.7787e-01 
+2025-02-26 10:48:50,150 INFO: [KonIQ..][epoch:  1, iter:   1,800, lr:(1.988e-04,)] [eta: 0:48:01, time (data): 0.155 (0.003)] l_mos: 2.4852e-03 train_metrics/srcc: 7.6190e-01 train_metrics/plcc: 9.7499e-01 
+2025-02-26 10:49:05,639 INFO: [KonIQ..][epoch:  1, iter:   1,900, lr:(1.988e-04,)] [eta: 0:47:43, time (data): 0.155 (0.003)] l_mos: 2.1262e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.8406e-01 
+2025-02-26 10:49:21,072 INFO: [KonIQ..][epoch:  1, iter:   2,000, lr:(1.988e-04,)] [eta: 0:47:26, time (data): 0.155 (0.003)] l_mos: 2.5494e-03 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.6184e-01 
+2025-02-26 10:49:21,073 INFO: Saving latest models and training states.
+2025-02-26 10:50:13,995 INFO: 1 validation datasets are used for validation.
+2025-02-26 10:52:07,155 INFO: Validation KonIQ10k
+	 # srcc: 0.9410	Best: 0.9410 @ 2014 iter
+	 # plcc: 0.9481	Best: 0.9481 @ 2014 iter
+
+2025-02-26 10:52:20,764 INFO: [KonIQ..][epoch:  2, iter:   2,100, lr:(1.951e-04,)] [eta: 1:10:40, time (data): 1.417 (1.266)] l_mos: 5.2370e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.3552e-01 
+2025-02-26 10:52:36,644 INFO: [KonIQ..][epoch:  2, iter:   2,200, lr:(1.951e-04,)] [eta: 1:09:14, time (data): 0.755 (0.602)] l_mos: 2.7064e-03 train_metrics/srcc: 8.8095e-01 train_metrics/plcc: 9.5342e-01 
+2025-02-26 10:52:51,934 INFO: [KonIQ..][epoch:  2, iter:   2,300, lr:(1.951e-04,)] [eta: 1:07:50, time (data): 0.153 (0.003)] l_mos: 4.4196e-03 train_metrics/srcc: 8.8095e-01 train_metrics/plcc: 9.2961e-01 
+2025-02-26 10:53:07,416 INFO: [KonIQ..][epoch:  2, iter:   2,400, lr:(1.951e-04,)] [eta: 1:06:33, time (data): 0.154 (0.003)] l_mos: 1.2717e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.5864e-01 
+2025-02-26 10:53:22,792 INFO: [KonIQ..][epoch:  2, iter:   2,500, lr:(1.951e-04,)] [eta: 1:05:21, time (data): 0.154 (0.003)] l_mos: 7.1046e-03 train_metrics/srcc: 8.3333e-01 train_metrics/plcc: 8.7729e-01 
+2025-02-26 10:53:38,124 INFO: [KonIQ..][epoch:  2, iter:   2,600, lr:(1.951e-04,)] [eta: 1:04:12, time (data): 0.153 (0.003)] l_mos: 2.2060e-03 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.5341e-01 
+2025-02-26 10:53:53,520 INFO: [KonIQ..][epoch:  2, iter:   2,700, lr:(1.951e-04,)] [eta: 1:03:08, time (data): 0.154 (0.003)] l_mos: 4.0876e-03 train_metrics/srcc: 7.8571e-01 train_metrics/plcc: 9.3912e-01 
+2025-02-26 10:54:08,913 INFO: [KonIQ..][epoch:  2, iter:   2,800, lr:(1.951e-04,)] [eta: 1:02:07, time (data): 0.154 (0.003)] l_mos: 5.7257e-03 train_metrics/srcc: 6.9048e-01 train_metrics/plcc: 9.1368e-01 
+2025-02-26 10:54:24,278 INFO: [KonIQ..][epoch:  2, iter:   2,900, lr:(1.951e-04,)] [eta: 1:01:09, time (data): 0.154 (0.003)] l_mos: 6.1598e-03 train_metrics/srcc: 4.2857e-01 train_metrics/plcc: 8.4259e-01 
+2025-02-26 10:54:39,730 INFO: [KonIQ..][epoch:  2, iter:   3,000, lr:(1.951e-04,)] [eta: 1:00:15, time (data): 0.154 (0.003)] l_mos: 7.3544e-03 train_metrics/srcc: 7.8571e-01 train_metrics/plcc: 7.1506e-01 
+2025-02-26 10:54:39,731 INFO: Saving latest models and training states.
+2025-02-26 10:55:00,926 INFO: [KonIQ..][epoch:  3, iter:   3,100, lr:(1.891e-04,)] [eta: 0:59:54, time (data): 0.159 (0.009)] l_mos: 9.2368e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.6896e-01 
+2025-02-26 10:55:16,290 INFO: [KonIQ..][epoch:  3, iter:   3,200, lr:(1.891e-04,)] [eta: 0:59:03, time (data): 0.156 (0.006)] l_mos: 1.7688e-03 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.7418e-01 
+2025-02-26 10:55:31,622 INFO: [KonIQ..][epoch:  3, iter:   3,300, lr:(1.891e-04,)] [eta: 0:58:14, time (data): 0.153 (0.003)] l_mos: 2.8256e-03 train_metrics/srcc: 6.1905e-01 train_metrics/plcc: 9.2332e-01 
+2025-02-26 10:55:47,029 INFO: [KonIQ..][epoch:  3, iter:   3,400, lr:(1.891e-04,)] [eta: 0:57:27, time (data): 0.154 (0.003)] l_mos: 2.7758e-03 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.2966e-01 
+2025-02-26 10:56:02,448 INFO: [KonIQ..][epoch:  3, iter:   3,500, lr:(1.891e-04,)] [eta: 0:56:42, time (data): 0.154 (0.003)] l_mos: 3.0402e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.0874e-01 
+2025-02-26 10:56:17,860 INFO: [KonIQ..][epoch:  3, iter:   3,600, lr:(1.891e-04,)] [eta: 0:55:58, time (data): 0.154 (0.003)] l_mos: 1.5896e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.8125e-01 
+2025-02-26 10:56:33,245 INFO: [KonIQ..][epoch:  3, iter:   3,700, lr:(1.891e-04,)] [eta: 0:55:16, time (data): 0.154 (0.003)] l_mos: 3.9477e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.4775e-01 
+2025-02-26 10:56:48,672 INFO: [KonIQ..][epoch:  3, iter:   3,800, lr:(1.891e-04,)] [eta: 0:54:36, time (data): 0.154 (0.003)] l_mos: 8.2920e-04 train_metrics/srcc: 7.6190e-01 train_metrics/plcc: 9.7181e-01 
+2025-02-26 10:57:04,255 INFO: [KonIQ..][epoch:  3, iter:   3,900, lr:(1.891e-04,)] [eta: 0:53:57, time (data): 0.156 (0.004)] l_mos: 5.2950e-03 train_metrics/srcc: 7.6190e-01 train_metrics/plcc: 7.8264e-01 
+2025-02-26 10:57:19,733 INFO: [KonIQ..][epoch:  3, iter:   4,000, lr:(1.891e-04,)] [eta: 0:53:19, time (data): 0.155 (0.003)] l_mos: 7.7387e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9188e-01 
+2025-02-26 10:57:19,734 INFO: Saving latest models and training states.
+2025-02-26 10:57:29,548 INFO: 1 validation datasets are used for validation.
+2025-02-26 10:59:26,644 INFO: Validation KonIQ10k
+	 # srcc: 0.9454	Best: 0.9454 @ 4028 iter
+	 # plcc: 0.9516	Best: 0.9516 @ 4028 iter
+
+2025-02-26 10:59:38,164 INFO: [KonIQ..][epoch:  4, iter:   4,100, lr:(1.809e-04,)] [eta: 1:00:44, time (data): 1.625 (1.473)] l_mos: 2.3561e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.7969e-01 
+2025-02-26 10:59:53,587 INFO: [KonIQ..][epoch:  4, iter:   4,200, lr:(1.809e-04,)] [eta: 0:59:54, time (data): 0.808 (0.656)] l_mos: 3.5072e-03 train_metrics/srcc: 8.3333e-01 train_metrics/plcc: 9.4397e-01 
+2025-02-26 11:00:09,008 INFO: [KonIQ..][epoch:  4, iter:   4,300, lr:(1.809e-04,)] [eta: 0:59:05, time (data): 0.154 (0.003)] l_mos: 2.2781e-03 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.8944e-01 
+2025-02-26 11:00:24,502 INFO: [KonIQ..][epoch:  4, iter:   4,400, lr:(1.809e-04,)] [eta: 0:58:18, time (data): 0.155 (0.003)] l_mos: 1.7462e-03 train_metrics/srcc: 4.5238e-01 train_metrics/plcc: 8.7910e-01 
+2025-02-26 11:00:39,998 INFO: [KonIQ..][epoch:  4, iter:   4,500, lr:(1.809e-04,)] [eta: 0:57:33, time (data): 0.155 (0.004)] l_mos: 1.5230e-03 train_metrics/srcc: 8.0952e-01 train_metrics/plcc: 9.4710e-01 
+2025-02-26 11:00:55,344 INFO: [KonIQ..][epoch:  4, iter:   4,600, lr:(1.809e-04,)] [eta: 0:56:48, time (data): 0.154 (0.003)] l_mos: 1.6085e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.8788e-01 
+2025-02-26 11:01:10,771 INFO: [KonIQ..][epoch:  4, iter:   4,700, lr:(1.809e-04,)] [eta: 0:56:05, time (data): 0.154 (0.003)] l_mos: 1.3659e-03 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.7075e-01 
+2025-02-26 11:01:26,243 INFO: [KonIQ..][epoch:  4, iter:   4,800, lr:(1.809e-04,)] [eta: 0:55:23, time (data): 0.154 (0.003)] l_mos: 6.1506e-04 train_metrics/srcc: 8.8095e-01 train_metrics/plcc: 9.5741e-01 
+2025-02-26 11:01:41,645 INFO: [KonIQ..][epoch:  4, iter:   4,900, lr:(1.809e-04,)] [eta: 0:54:42, time (data): 0.154 (0.003)] l_mos: 5.4871e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 8.1669e-01 
+2025-02-26 11:01:57,033 INFO: [KonIQ..][epoch:  4, iter:   5,000, lr:(1.809e-04,)] [eta: 0:54:02, time (data): 0.154 (0.003)] l_mos: 1.0387e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.7010e-01 
+2025-02-26 11:01:57,034 INFO: Saving latest models and training states.
+2025-02-26 11:02:18,124 INFO: [KonIQ..][epoch:  5, iter:   5,100, lr:(1.707e-04,)] [eta: 0:53:39, time (data): 0.161 (0.009)] l_mos: 1.9012e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.6823e-01 
+2025-02-26 11:02:33,597 INFO: [KonIQ..][epoch:  5, iter:   5,200, lr:(1.707e-04,)] [eta: 0:53:01, time (data): 0.157 (0.006)] l_mos: 2.0086e-03 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.3565e-01 
+2025-02-26 11:02:49,045 INFO: [KonIQ..][epoch:  5, iter:   5,300, lr:(1.707e-04,)] [eta: 0:52:23, time (data): 0.154 (0.003)] l_mos: 5.0563e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.8583e-01 
+2025-02-26 11:03:04,521 INFO: [KonIQ..][epoch:  5, iter:   5,400, lr:(1.707e-04,)] [eta: 0:51:47, time (data): 0.155 (0.003)] l_mos: 3.2587e-03 train_metrics/srcc: 8.3333e-01 train_metrics/plcc: 8.5683e-01 
+2025-02-26 11:03:20,034 INFO: [KonIQ..][epoch:  5, iter:   5,500, lr:(1.707e-04,)] [eta: 0:51:11, time (data): 0.155 (0.003)] l_mos: 4.4930e-03 train_metrics/srcc: 8.3333e-01 train_metrics/plcc: 8.9649e-01 
+2025-02-26 11:03:35,521 INFO: [KonIQ..][epoch:  5, iter:   5,600, lr:(1.707e-04,)] [eta: 0:50:36, time (data): 0.155 (0.003)] l_mos: 4.6229e-03 train_metrics/srcc: 6.6667e-01 train_metrics/plcc: 8.2004e-01 
+2025-02-26 11:03:51,017 INFO: [KonIQ..][epoch:  5, iter:   5,700, lr:(1.707e-04,)] [eta: 0:50:01, time (data): 0.154 (0.003)] l_mos: 1.1528e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.7519e-01 
+2025-02-26 11:04:06,516 INFO: [KonIQ..][epoch:  5, iter:   5,800, lr:(1.707e-04,)] [eta: 0:49:27, time (data): 0.155 (0.003)] l_mos: 4.0450e-03 train_metrics/srcc: 8.8095e-01 train_metrics/plcc: 9.5744e-01 
+2025-02-26 11:04:22,075 INFO: [KonIQ..][epoch:  5, iter:   5,900, lr:(1.707e-04,)] [eta: 0:48:54, time (data): 0.156 (0.003)] l_mos: 3.3333e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.6714e-01 
+2025-02-26 11:04:37,498 INFO: [KonIQ..][epoch:  5, iter:   6,000, lr:(1.707e-04,)] [eta: 0:48:22, time (data): 0.155 (0.003)] l_mos: 2.2112e-03 train_metrics/srcc: 7.3810e-01 train_metrics/plcc: 8.3618e-01 
+2025-02-26 11:04:37,843 INFO: Saving latest models and training states.
+2025-02-26 11:06:19,266 INFO: 1 validation datasets are used for validation.
+2025-02-26 11:08:09,857 INFO: Validation KonIQ10k
+	 # srcc: 0.9415	Best: 0.9454 @ 4028 iter
+	 # plcc: 0.9474	Best: 0.9516 @ 4028 iter
+
+2025-02-26 11:08:19,328 INFO: [KonIQ..][epoch:  6, iter:   6,100, lr:(1.588e-04,)] [eta: 0:55:45, time (data): 1.744 (1.592)] l_mos: 1.5875e-03 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.1300e-01 
+2025-02-26 11:08:35,305 INFO: [KonIQ..][epoch:  6, iter:   6,200, lr:(1.588e-04,)] [eta: 0:55:04, time (data): 0.812 (0.658)] l_mos: 1.6955e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.6824e-01 
+2025-02-26 11:08:50,758 INFO: [KonIQ..][epoch:  6, iter:   6,300, lr:(1.588e-04,)] [eta: 0:54:22, time (data): 0.155 (0.003)] l_mos: 2.1304e-03 train_metrics/srcc: 8.0952e-01 train_metrics/plcc: 9.4603e-01 
+2025-02-26 11:09:06,311 INFO: [KonIQ..][epoch:  6, iter:   6,400, lr:(1.588e-04,)] [eta: 0:53:41, time (data): 0.155 (0.003)] l_mos: 7.0503e-04 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.8175e-01 
+2025-02-26 11:09:21,734 INFO: [KonIQ..][epoch:  6, iter:   6,500, lr:(1.588e-04,)] [eta: 0:53:01, time (data): 0.154 (0.003)] l_mos: 1.3322e-03 train_metrics/srcc: 8.8095e-01 train_metrics/plcc: 9.6813e-01 
+2025-02-26 11:09:37,182 INFO: [KonIQ..][epoch:  6, iter:   6,600, lr:(1.588e-04,)] [eta: 0:52:22, time (data): 0.154 (0.003)] l_mos: 3.3225e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 8.8985e-01 
+2025-02-26 11:09:52,610 INFO: [KonIQ..][epoch:  6, iter:   6,700, lr:(1.588e-04,)] [eta: 0:51:43, time (data): 0.154 (0.003)] l_mos: 3.1385e-03 train_metrics/srcc: 8.5714e-01 train_metrics/plcc: 9.1759e-01 
+2025-02-26 11:10:08,108 INFO: [KonIQ..][epoch:  6, iter:   6,800, lr:(1.588e-04,)] [eta: 0:51:05, time (data): 0.155 (0.003)] l_mos: 2.5729e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.4941e-01 
+2025-02-26 11:10:23,561 INFO: [KonIQ..][epoch:  6, iter:   6,900, lr:(1.588e-04,)] [eta: 0:50:28, time (data): 0.154 (0.003)] l_mos: 4.5765e-03 train_metrics/srcc: 7.6190e-01 train_metrics/plcc: 9.4362e-01 
+2025-02-26 11:10:39,068 INFO: [KonIQ..][epoch:  6, iter:   7,000, lr:(1.588e-04,)] [eta: 0:49:51, time (data): 0.155 (0.003)] l_mos: 2.9294e-03 train_metrics/srcc: 7.8571e-01 train_metrics/plcc: 9.7918e-01 
+2025-02-26 11:10:39,069 INFO: Saving latest models and training states.
+2025-02-26 11:12:42,649 INFO: [KonIQ..][epoch:  7, iter:   7,100, lr:(1.454e-04,)] [eta: 0:52:34, time (data): 0.161 (0.011)] l_mos: 1.7917e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.7244e-01 
+2025-02-26 11:12:57,890 INFO: [KonIQ..][epoch:  7, iter:   7,200, lr:(1.454e-04,)] [eta: 0:51:54, time (data): 0.156 (0.006)] l_mos: 3.2674e-03 train_metrics/srcc: 7.8571e-01 train_metrics/plcc: 9.6922e-01 
+2025-02-26 11:13:13,124 INFO: [KonIQ..][epoch:  7, iter:   7,300, lr:(1.454e-04,)] [eta: 0:51:14, time (data): 0.152 (0.003)] l_mos: 2.3985e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.2983e-01 
+2025-02-26 11:13:28,506 INFO: [KonIQ..][epoch:  7, iter:   7,400, lr:(1.454e-04,)] [eta: 0:50:35, time (data): 0.153 (0.003)] l_mos: 1.5236e-03 train_metrics/srcc: 8.3333e-01 train_metrics/plcc: 9.5571e-01 
+2025-02-26 11:13:43,897 INFO: [KonIQ..][epoch:  7, iter:   7,500, lr:(1.454e-04,)] [eta: 0:49:57, time (data): 0.155 (0.004)] l_mos: 1.0940e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.8413e-01 
+2025-02-26 11:13:59,265 INFO: [KonIQ..][epoch:  7, iter:   7,600, lr:(1.454e-04,)] [eta: 0:49:20, time (data): 0.154 (0.004)] l_mos: 1.2080e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.5570e-01 
+2025-02-26 11:14:14,771 INFO: [KonIQ..][epoch:  7, iter:   7,700, lr:(1.454e-04,)] [eta: 0:48:43, time (data): 0.156 (0.003)] l_mos: 1.7998e-03 train_metrics/srcc: 8.0952e-01 train_metrics/plcc: 9.7041e-01 
+2025-02-26 11:14:30,111 INFO: [KonIQ..][epoch:  7, iter:   7,800, lr:(1.454e-04,)] [eta: 0:48:07, time (data): 0.154 (0.003)] l_mos: 3.7981e-03 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.4041e-01 
+2025-02-26 11:14:45,499 INFO: [KonIQ..][epoch:  7, iter:   7,900, lr:(1.454e-04,)] [eta: 0:47:31, time (data): 0.154 (0.003)] l_mos: 2.4024e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.6349e-01 
+2025-02-26 11:15:00,929 INFO: [KonIQ..][epoch:  7, iter:   8,000, lr:(1.454e-04,)] [eta: 0:46:56, time (data): 0.154 (0.003)] l_mos: 1.8136e-03 train_metrics/srcc: 8.5714e-01 train_metrics/plcc: 9.8715e-01 
+2025-02-26 11:15:00,930 INFO: Saving latest models and training states.
+2025-02-26 11:15:59,927 INFO: 1 validation datasets are used for validation.
+2025-02-26 11:17:50,893 INFO: Validation KonIQ10k
+	 # srcc: 0.9419	Best: 0.9454 @ 4028 iter
+	 # plcc: 0.9488	Best: 0.9516 @ 4028 iter
+
+2025-02-26 11:17:58,185 INFO: [KonIQ..][epoch:  8, iter:   8,100, lr:(1.309e-04,)] [eta: 0:50:22, time (data): 2.013 (1.862)] l_mos: 3.0294e-03 train_metrics/srcc: 8.0952e-01 train_metrics/plcc: 9.3760e-01 
+2025-02-26 11:18:13,542 INFO: [KonIQ..][epoch:  8, iter:   8,200, lr:(1.309e-04,)] [eta: 0:49:43, time (data): 0.851 (0.700)] l_mos: 9.9861e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.8934e-01 
+2025-02-26 11:18:29,118 INFO: [KonIQ..][epoch:  8, iter:   8,300, lr:(1.309e-04,)] [eta: 0:49:05, time (data): 0.155 (0.003)] l_mos: 9.0190e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.7916e-01 
+2025-02-26 11:18:44,566 INFO: [KonIQ..][epoch:  8, iter:   8,400, lr:(1.309e-04,)] [eta: 0:48:27, time (data): 0.155 (0.003)] l_mos: 5.7599e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.9333e-01 
+2025-02-26 11:19:00,049 INFO: [KonIQ..][epoch:  8, iter:   8,500, lr:(1.309e-04,)] [eta: 0:47:49, time (data): 0.155 (0.003)] l_mos: 8.5188e-04 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.6565e-01 
+2025-02-26 11:19:15,522 INFO: [KonIQ..][epoch:  8, iter:   8,600, lr:(1.309e-04,)] [eta: 0:47:13, time (data): 0.155 (0.003)] l_mos: 2.0956e-03 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9151e-01 
+2025-02-26 11:19:30,988 INFO: [KonIQ..][epoch:  8, iter:   8,700, lr:(1.309e-04,)] [eta: 0:46:36, time (data): 0.154 (0.003)] l_mos: 1.2712e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.8959e-01 
+2025-02-26 11:19:46,456 INFO: [KonIQ..][epoch:  8, iter:   8,800, lr:(1.309e-04,)] [eta: 0:46:00, time (data): 0.154 (0.003)] l_mos: 8.0386e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.8617e-01 
+2025-02-26 11:20:01,898 INFO: [KonIQ..][epoch:  8, iter:   8,900, lr:(1.309e-04,)] [eta: 0:45:25, time (data): 0.154 (0.003)] l_mos: 1.1674e-03 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.8531e-01 
+2025-02-26 11:20:17,441 INFO: [KonIQ..][epoch:  8, iter:   9,000, lr:(1.309e-04,)] [eta: 0:44:50, time (data): 0.155 (0.003)] l_mos: 2.5331e-04 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.9723e-01 
+2025-02-26 11:20:17,442 INFO: Saving latest models and training states.
+2025-02-26 11:20:49,231 INFO: [KonIQ..][epoch:  9, iter:   9,100, lr:(1.156e-04,)] [eta: 0:44:35, time (data): 0.165 (0.014)] l_mos: 5.8028e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.9357e-01 
+2025-02-26 11:21:04,515 INFO: [KonIQ..][epoch:  9, iter:   9,200, lr:(1.156e-04,)] [eta: 0:44:00, time (data): 0.157 (0.007)] l_mos: 1.1752e-03 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.6848e-01 
+2025-02-26 11:21:19,904 INFO: [KonIQ..][epoch:  9, iter:   9,300, lr:(1.156e-04,)] [eta: 0:43:26, time (data): 0.154 (0.003)] l_mos: 4.9221e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.9221e-01 
+2025-02-26 11:21:35,338 INFO: [KonIQ..][epoch:  9, iter:   9,400, lr:(1.156e-04,)] [eta: 0:42:52, time (data): 0.154 (0.003)] l_mos: 6.5060e-04 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.7931e-01 
+2025-02-26 11:21:50,707 INFO: [KonIQ..][epoch:  9, iter:   9,500, lr:(1.156e-04,)] [eta: 0:42:19, time (data): 0.154 (0.003)] l_mos: 4.7960e-03 train_metrics/srcc: 6.4286e-01 train_metrics/plcc: 7.6872e-01 
+2025-02-26 11:22:06,176 INFO: [KonIQ..][epoch:  9, iter:   9,600, lr:(1.156e-04,)] [eta: 0:41:46, time (data): 0.154 (0.003)] l_mos: 9.7174e-04 train_metrics/srcc: 8.8095e-01 train_metrics/plcc: 9.5995e-01 
+2025-02-26 11:22:21,670 INFO: [KonIQ..][epoch:  9, iter:   9,700, lr:(1.156e-04,)] [eta: 0:41:13, time (data): 0.155 (0.004)] l_mos: 5.9237e-04 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.8279e-01 
+2025-02-26 11:22:37,063 INFO: [KonIQ..][epoch:  9, iter:   9,800, lr:(1.156e-04,)] [eta: 0:40:41, time (data): 0.154 (0.003)] l_mos: 1.9936e-03 train_metrics/srcc: 8.3333e-01 train_metrics/plcc: 9.0984e-01 
+2025-02-26 11:22:52,522 INFO: [KonIQ..][epoch:  9, iter:   9,900, lr:(1.156e-04,)] [eta: 0:40:09, time (data): 0.155 (0.003)] l_mos: 1.6908e-03 train_metrics/srcc: 8.8095e-01 train_metrics/plcc: 9.5866e-01 
+2025-02-26 11:23:07,937 INFO: [KonIQ..][epoch:  9, iter:  10,000, lr:(1.156e-04,)] [eta: 0:39:37, time (data): 0.154 (0.003)] l_mos: 7.2426e-04 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.9247e-01 
+2025-02-26 11:23:07,938 INFO: Saving latest models and training states.
+2025-02-26 11:23:57,189 INFO: 1 validation datasets are used for validation.
+2025-02-26 11:25:48,480 INFO: Validation KonIQ10k
+	 # srcc: 0.9419	Best: 0.9454 @ 4028 iter
+	 # plcc: 0.9489	Best: 0.9516 @ 4028 iter
+
+2025-02-26 11:25:53,533 INFO: [KonIQ..][epoch: 10, iter:  10,100, lr:(1.000e-04,)] [eta: 0:41:35, time (data): 2.391 (2.240)] l_mos: 8.1955e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.8650e-01 
+2025-02-26 11:26:09,045 INFO: [KonIQ..][epoch: 10, iter:  10,200, lr:(1.000e-04,)] [eta: 0:41:01, time (data): 0.900 (0.749)] l_mos: 2.4934e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.6122e-01 
+2025-02-26 11:26:24,819 INFO: [KonIQ..][epoch: 10, iter:  10,300, lr:(1.000e-04,)] [eta: 0:40:28, time (data): 0.155 (0.003)] l_mos: 4.0745e-04 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.9313e-01 
+2025-02-26 11:26:40,208 INFO: [KonIQ..][epoch: 10, iter:  10,400, lr:(1.000e-04,)] [eta: 0:39:55, time (data): 0.154 (0.003)] l_mos: 1.2486e-03 train_metrics/srcc: 8.3333e-01 train_metrics/plcc: 9.8633e-01 
+2025-02-26 11:26:55,673 INFO: [KonIQ..][epoch: 10, iter:  10,500, lr:(1.000e-04,)] [eta: 0:39:22, time (data): 0.155 (0.004)] l_mos: 4.4780e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.8976e-01 
+2025-02-26 11:27:11,126 INFO: [KonIQ..][epoch: 10, iter:  10,600, lr:(1.000e-04,)] [eta: 0:38:49, time (data): 0.155 (0.003)] l_mos: 5.2970e-03 train_metrics/srcc: 7.3810e-01 train_metrics/plcc: 9.5333e-01 
+2025-02-26 11:27:26,622 INFO: [KonIQ..][epoch: 10, iter:  10,700, lr:(1.000e-04,)] [eta: 0:38:17, time (data): 0.155 (0.003)] l_mos: 7.7110e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.8717e-01 
+2025-02-26 11:27:42,046 INFO: [KonIQ..][epoch: 10, iter:  10,800, lr:(1.000e-04,)] [eta: 0:37:45, time (data): 0.154 (0.003)] l_mos: 9.0525e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.4885e-01 
+2025-02-26 11:27:57,486 INFO: [KonIQ..][epoch: 10, iter:  10,900, lr:(1.000e-04,)] [eta: 0:37:13, time (data): 0.154 (0.003)] l_mos: 2.2080e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.6111e-01 
+2025-02-26 11:28:12,905 INFO: [KonIQ..][epoch: 10, iter:  11,000, lr:(1.000e-04,)] [eta: 0:36:42, time (data): 0.154 (0.003)] l_mos: 8.5459e-04 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.5861e-01 
+2025-02-26 11:28:12,906 INFO: Saving latest models and training states.
+2025-02-26 11:28:44,915 INFO: [KonIQ..][epoch: 11, iter:  11,100, lr:(8.436e-05,)] [eta: 0:36:24, time (data): 0.166 (0.016)] l_mos: 9.8269e-04 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.3977e-01 
+2025-02-26 11:29:00,237 INFO: [KonIQ..][epoch: 11, iter:  11,200, lr:(8.436e-05,)] [eta: 0:35:53, time (data): 0.157 (0.007)] l_mos: 1.8758e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.7916e-01 
+2025-02-26 11:29:15,575 INFO: [KonIQ..][epoch: 11, iter:  11,300, lr:(8.436e-05,)] [eta: 0:35:22, time (data): 0.153 (0.003)] l_mos: 4.9875e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9488e-01 
+2025-02-26 11:29:31,271 INFO: [KonIQ..][epoch: 11, iter:  11,400, lr:(8.436e-05,)] [eta: 0:34:52, time (data): 0.156 (0.004)] l_mos: 6.6749e-04 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.6930e-01 
+2025-02-26 11:29:46,747 INFO: [KonIQ..][epoch: 11, iter:  11,500, lr:(8.436e-05,)] [eta: 0:34:22, time (data): 0.154 (0.003)] l_mos: 2.5253e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.8146e-01 
+2025-02-26 11:30:02,328 INFO: [KonIQ..][epoch: 11, iter:  11,600, lr:(8.436e-05,)] [eta: 0:33:52, time (data): 0.155 (0.003)] l_mos: 1.1086e-03 train_metrics/srcc: 8.8095e-01 train_metrics/plcc: 9.3877e-01 
+2025-02-26 11:30:17,949 INFO: [KonIQ..][epoch: 11, iter:  11,700, lr:(8.436e-05,)] [eta: 0:33:22, time (data): 0.158 (0.005)] l_mos: 2.0962e-03 train_metrics/srcc: 7.6190e-01 train_metrics/plcc: 9.5555e-01 
+2025-02-26 11:30:33,513 INFO: [KonIQ..][epoch: 11, iter:  11,800, lr:(8.436e-05,)] [eta: 0:32:53, time (data): 0.156 (0.004)] l_mos: 7.1090e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.8796e-01 
+2025-02-26 11:30:48,905 INFO: [KonIQ..][epoch: 11, iter:  11,900, lr:(8.436e-05,)] [eta: 0:32:24, time (data): 0.154 (0.003)] l_mos: 2.8378e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.6865e-01 
+2025-02-26 11:31:04,356 INFO: [KonIQ..][epoch: 11, iter:  12,000, lr:(8.436e-05,)] [eta: 0:31:55, time (data): 0.154 (0.003)] l_mos: 6.5147e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9310e-01 
+2025-02-26 11:31:04,357 INFO: Saving latest models and training states.
+2025-02-26 11:31:30,343 INFO: 1 validation datasets are used for validation.
+2025-02-26 11:33:22,225 INFO: Validation KonIQ10k
+	 # srcc: 0.9406	Best: 0.9454 @ 4028 iter
+	 # plcc: 0.9471	Best: 0.9516 @ 4028 iter
+
+2025-02-26 11:33:25,147 INFO: [KonIQ..][epoch: 12, iter:  12,100, lr:(6.910e-05,)] [eta: 0:32:49, time (data): 2.966 (2.814)] l_mos: 4.8873e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.8575e-01 
+2025-02-26 11:33:40,718 INFO: [KonIQ..][epoch: 12, iter:  12,200, lr:(6.910e-05,)] [eta: 0:32:19, time (data): 0.959 (0.807)] l_mos: 6.8962e-04 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.9258e-01 
+2025-02-26 11:33:56,156 INFO: [KonIQ..][epoch: 12, iter:  12,300, lr:(6.910e-05,)] [eta: 0:31:49, time (data): 0.154 (0.003)] l_mos: 1.8487e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9464e-01 
+2025-02-26 11:34:11,710 INFO: [KonIQ..][epoch: 12, iter:  12,400, lr:(6.910e-05,)] [eta: 0:31:19, time (data): 0.155 (0.003)] l_mos: 3.1425e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.4535e-01 
+2025-02-26 11:34:27,224 INFO: [KonIQ..][epoch: 12, iter:  12,500, lr:(6.910e-05,)] [eta: 0:30:50, time (data): 0.156 (0.004)] l_mos: 8.4977e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.7136e-01 
+2025-02-26 11:34:42,656 INFO: [KonIQ..][epoch: 12, iter:  12,600, lr:(6.910e-05,)] [eta: 0:30:20, time (data): 0.155 (0.003)] l_mos: 2.5480e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.8899e-01 
+2025-02-26 11:34:58,098 INFO: [KonIQ..][epoch: 12, iter:  12,700, lr:(6.910e-05,)] [eta: 0:29:51, time (data): 0.155 (0.003)] l_mos: 3.2808e-03 train_metrics/srcc: 8.5714e-01 train_metrics/plcc: 9.5735e-01 
+2025-02-26 11:35:13,567 INFO: [KonIQ..][epoch: 12, iter:  12,800, lr:(6.910e-05,)] [eta: 0:29:22, time (data): 0.155 (0.003)] l_mos: 1.4869e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.8385e-01 
+2025-02-26 11:35:29,076 INFO: [KonIQ..][epoch: 12, iter:  12,900, lr:(6.910e-05,)] [eta: 0:28:53, time (data): 0.155 (0.003)] l_mos: 3.6425e-03 train_metrics/srcc: 7.1429e-01 train_metrics/plcc: 8.9871e-01 
+2025-02-26 11:35:44,514 INFO: [KonIQ..][epoch: 12, iter:  13,000, lr:(6.910e-05,)] [eta: 0:28:25, time (data): 0.155 (0.003)] l_mos: 7.9121e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9150e-01 
+2025-02-26 11:35:44,515 INFO: Saving latest models and training states.
+2025-02-26 11:36:13,823 INFO: [KonIQ..][epoch: 13, iter:  13,100, lr:(5.460e-05,)] [eta: 0:28:04, time (data): 0.168 (0.018)] l_mos: 2.1255e-03 train_metrics/srcc: 8.5714e-01 train_metrics/plcc: 9.1843e-01 
+2025-02-26 11:36:29,167 INFO: [KonIQ..][epoch: 13, iter:  13,200, lr:(5.460e-05,)] [eta: 0:27:36, time (data): 0.157 (0.007)] l_mos: 1.0820e-03 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.8265e-01 
+2025-02-26 11:36:44,588 INFO: [KonIQ..][epoch: 13, iter:  13,300, lr:(5.460e-05,)] [eta: 0:27:08, time (data): 0.154 (0.003)] l_mos: 7.0983e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9427e-01 
+2025-02-26 11:36:59,928 INFO: [KonIQ..][epoch: 13, iter:  13,400, lr:(5.460e-05,)] [eta: 0:26:40, time (data): 0.153 (0.003)] l_mos: 1.7212e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.6846e-01 
+2025-02-26 11:37:15,342 INFO: [KonIQ..][epoch: 13, iter:  13,500, lr:(5.460e-05,)] [eta: 0:26:12, time (data): 0.154 (0.003)] l_mos: 8.0900e-04 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.2536e-01 
+2025-02-26 11:37:30,686 INFO: [KonIQ..][epoch: 13, iter:  13,600, lr:(5.460e-05,)] [eta: 0:25:44, time (data): 0.154 (0.003)] l_mos: 9.1497e-04 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.9836e-01 
+2025-02-26 11:37:46,192 INFO: [KonIQ..][epoch: 13, iter:  13,700, lr:(5.460e-05,)] [eta: 0:25:17, time (data): 0.155 (0.003)] l_mos: 1.0238e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.8608e-01 
+2025-02-26 11:38:01,673 INFO: [KonIQ..][epoch: 13, iter:  13,800, lr:(5.460e-05,)] [eta: 0:24:50, time (data): 0.155 (0.003)] l_mos: 7.2797e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.8428e-01 
+2025-02-26 11:38:17,028 INFO: [KonIQ..][epoch: 13, iter:  13,900, lr:(5.460e-05,)] [eta: 0:24:23, time (data): 0.153 (0.003)] l_mos: 1.3405e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.8918e-01 
+2025-02-26 11:38:32,385 INFO: [KonIQ..][epoch: 13, iter:  14,000, lr:(5.460e-05,)] [eta: 0:23:56, time (data): 0.153 (0.003)] l_mos: 1.2576e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.6607e-01 
+2025-02-26 11:38:32,386 INFO: Saving latest models and training states.
+2025-02-26 11:38:56,409 INFO: 1 validation datasets are used for validation.
+2025-02-26 11:40:48,359 INFO: Validation KonIQ10k
+	 # srcc: 0.9408	Best: 0.9454 @ 4028 iter
+	 # plcc: 0.9489	Best: 0.9516 @ 4028 iter
+
+2025-02-26 11:40:49,133 INFO: [KonIQ..][epoch: 14, iter:  14,100, lr:(4.122e-05,)] [eta: 0:24:21, time (data): 3.905 (3.753)] l_mos: 1.1526e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.6300e-01 
+2025-02-26 11:41:04,720 INFO: [KonIQ..][epoch: 14, iter:  14,200, lr:(4.122e-05,)] [eta: 0:23:53, time (data): 1.021 (0.869)] l_mos: 8.9807e-04 train_metrics/srcc: 5.7143e-01 train_metrics/plcc: 9.1780e-01 
+2025-02-26 11:41:20,238 INFO: [KonIQ..][epoch: 14, iter:  14,300, lr:(4.122e-05,)] [eta: 0:23:26, time (data): 0.154 (0.003)] l_mos: 8.2524e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.9634e-01 
+2025-02-26 11:41:35,745 INFO: [KonIQ..][epoch: 14, iter:  14,400, lr:(4.122e-05,)] [eta: 0:22:58, time (data): 0.155 (0.003)] l_mos: 3.7362e-04 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.9185e-01 
+2025-02-26 11:41:51,265 INFO: [KonIQ..][epoch: 14, iter:  14,500, lr:(4.122e-05,)] [eta: 0:22:31, time (data): 0.155 (0.003)] l_mos: 1.0291e-03 train_metrics/srcc: 8.5714e-01 train_metrics/plcc: 9.1447e-01 
+2025-02-26 11:42:06,684 INFO: [KonIQ..][epoch: 14, iter:  14,600, lr:(4.122e-05,)] [eta: 0:22:04, time (data): 0.154 (0.003)] l_mos: 1.4547e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.7749e-01 
+2025-02-26 11:42:22,107 INFO: [KonIQ..][epoch: 14, iter:  14,700, lr:(4.122e-05,)] [eta: 0:21:37, time (data): 0.153 (0.003)] l_mos: 5.8739e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9436e-01 
+2025-02-26 11:42:37,610 INFO: [KonIQ..][epoch: 14, iter:  14,800, lr:(4.122e-05,)] [eta: 0:21:10, time (data): 0.155 (0.003)] l_mos: 1.2166e-03 train_metrics/srcc: 7.3810e-01 train_metrics/plcc: 9.7483e-01 
+2025-02-26 11:42:53,001 INFO: [KonIQ..][epoch: 14, iter:  14,900, lr:(4.122e-05,)] [eta: 0:20:44, time (data): 0.153 (0.003)] l_mos: 1.0659e-03 train_metrics/srcc: 8.3333e-01 train_metrics/plcc: 9.5401e-01 
+2025-02-26 11:43:08,427 INFO: [KonIQ..][epoch: 14, iter:  15,000, lr:(4.122e-05,)] [eta: 0:20:17, time (data): 0.154 (0.003)] l_mos: 5.2128e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.0786e-01 
+2025-02-26 11:43:08,428 INFO: Saving latest models and training states.
+2025-02-26 11:43:28,834 INFO: [KonIQ..][epoch: 14, iter:  15,100, lr:(4.122e-05,)] [eta: 0:19:53, time (data): 0.163 (0.005)] l_mos: 1.1297e-03 train_metrics/srcc: 8.8095e-01 train_metrics/plcc: 9.7409e-01 
+2025-02-26 11:43:44,864 INFO: [KonIQ..][epoch: 15, iter:  15,200, lr:(2.929e-05,)] [eta: 0:19:27, time (data): 0.161 (0.008)] l_mos: 1.7022e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9798e-01 
+2025-02-26 11:44:00,406 INFO: [KonIQ..][epoch: 15, iter:  15,300, lr:(2.929e-05,)] [eta: 0:19:00, time (data): 0.154 (0.004)] l_mos: 2.8364e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9715e-01 
+2025-02-26 11:44:15,783 INFO: [KonIQ..][epoch: 15, iter:  15,400, lr:(2.929e-05,)] [eta: 0:18:34, time (data): 0.154 (0.003)] l_mos: 7.2550e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9813e-01 
+2025-02-26 11:44:31,207 INFO: [KonIQ..][epoch: 15, iter:  15,500, lr:(2.929e-05,)] [eta: 0:18:09, time (data): 0.154 (0.003)] l_mos: 3.2878e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.9440e-01 
+2025-02-26 11:44:46,695 INFO: [KonIQ..][epoch: 15, iter:  15,600, lr:(2.929e-05,)] [eta: 0:17:43, time (data): 0.155 (0.003)] l_mos: 1.8683e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9563e-01 
+2025-02-26 11:45:02,192 INFO: [KonIQ..][epoch: 15, iter:  15,700, lr:(2.929e-05,)] [eta: 0:17:17, time (data): 0.156 (0.004)] l_mos: 3.9457e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.8590e-01 
+2025-02-26 11:45:17,652 INFO: [KonIQ..][epoch: 15, iter:  15,800, lr:(2.929e-05,)] [eta: 0:16:52, time (data): 0.155 (0.003)] l_mos: 6.4368e-04 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.8779e-01 
+2025-02-26 11:45:33,069 INFO: [KonIQ..][epoch: 15, iter:  15,900, lr:(2.929e-05,)] [eta: 0:16:27, time (data): 0.153 (0.003)] l_mos: 2.7077e-03 train_metrics/srcc: 8.8095e-01 train_metrics/plcc: 9.2155e-01 
+2025-02-26 11:45:48,520 INFO: [KonIQ..][epoch: 15, iter:  16,000, lr:(2.929e-05,)] [eta: 0:16:01, time (data): 0.154 (0.003)] l_mos: 6.3011e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9086e-01 
+2025-02-26 11:45:48,521 INFO: Saving latest models and training states.
+2025-02-26 11:46:08,613 INFO: [KonIQ..][epoch: 15, iter:  16,100, lr:(2.929e-05,)] [eta: 0:15:38, time (data): 0.155 (0.003)] l_mos: 4.1344e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.9266e-01 
+2025-02-26 11:46:10,643 INFO: 1 validation datasets are used for validation.
+2025-02-26 11:48:02,656 INFO: Validation KonIQ10k
+	 # srcc: 0.9386	Best: 0.9454 @ 4028 iter
+	 # plcc: 0.9457	Best: 0.9516 @ 4028 iter
+
+2025-02-26 11:48:16,751 INFO: [KonIQ..][epoch: 16, iter:  16,200, lr:(1.910e-05,)] [eta: 0:15:40, time (data): 1.094 (0.942)] l_mos: 3.3715e-04 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.9171e-01 
+2025-02-26 11:48:32,206 INFO: [KonIQ..][epoch: 16, iter:  16,300, lr:(1.910e-05,)] [eta: 0:15:14, time (data): 0.154 (0.003)] l_mos: 6.6864e-04 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.8520e-01 
+2025-02-26 11:48:47,646 INFO: [KonIQ..][epoch: 16, iter:  16,400, lr:(1.910e-05,)] [eta: 0:14:49, time (data): 0.154 (0.003)] l_mos: 2.7252e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.7877e-01 
+2025-02-26 11:49:03,305 INFO: [KonIQ..][epoch: 16, iter:  16,500, lr:(1.910e-05,)] [eta: 0:14:23, time (data): 0.161 (0.005)] l_mos: 6.5174e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.9303e-01 
+2025-02-26 11:49:18,762 INFO: [KonIQ..][epoch: 16, iter:  16,600, lr:(1.910e-05,)] [eta: 0:13:58, time (data): 0.156 (0.003)] l_mos: 2.1859e-03 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.8829e-01 
+2025-02-26 11:49:34,213 INFO: [KonIQ..][epoch: 16, iter:  16,700, lr:(1.910e-05,)] [eta: 0:13:33, time (data): 0.155 (0.003)] l_mos: 4.5333e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.8048e-01 
+2025-02-26 11:49:49,664 INFO: [KonIQ..][epoch: 16, iter:  16,800, lr:(1.910e-05,)] [eta: 0:13:08, time (data): 0.155 (0.003)] l_mos: 6.7827e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.9639e-01 
+2025-02-26 11:50:05,097 INFO: [KonIQ..][epoch: 16, iter:  16,900, lr:(1.910e-05,)] [eta: 0:12:43, time (data): 0.154 (0.003)] l_mos: 1.3893e-03 train_metrics/srcc: 6.9048e-01 train_metrics/plcc: 8.1420e-01 
+2025-02-26 11:50:20,520 INFO: [KonIQ..][epoch: 16, iter:  17,000, lr:(1.910e-05,)] [eta: 0:12:18, time (data): 0.154 (0.003)] l_mos: 3.4015e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9481e-01 
+2025-02-26 11:50:20,520 INFO: Saving latest models and training states.
+2025-02-26 11:50:40,875 INFO: [KonIQ..][epoch: 16, iter:  17,100, lr:(1.910e-05,)] [eta: 0:11:54, time (data): 0.154 (0.003)] l_mos: 2.4696e-03 train_metrics/srcc: 8.3333e-01 train_metrics/plcc: 8.7306e-01 
+2025-02-26 11:50:56,861 INFO: [KonIQ..][epoch: 17, iter:  17,200, lr:(1.090e-05,)] [eta: 0:11:29, time (data): 0.159 (0.008)] l_mos: 2.4668e-04 train_metrics/srcc: 9.2857e-01 train_metrics/plcc: 9.9527e-01 
+2025-02-26 11:51:12,330 INFO: [KonIQ..][epoch: 17, iter:  17,300, lr:(1.090e-05,)] [eta: 0:11:05, time (data): 0.154 (0.003)] l_mos: 1.0567e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.7649e-01 
+2025-02-26 11:51:27,830 INFO: [KonIQ..][epoch: 17, iter:  17,400, lr:(1.090e-05,)] [eta: 0:10:40, time (data): 0.155 (0.003)] l_mos: 5.3626e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.8711e-01 
+2025-02-26 11:51:43,479 INFO: [KonIQ..][epoch: 17, iter:  17,500, lr:(1.090e-05,)] [eta: 0:10:16, time (data): 0.155 (0.003)] l_mos: 3.0386e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9342e-01 
+2025-02-26 11:51:58,920 INFO: [KonIQ..][epoch: 17, iter:  17,600, lr:(1.090e-05,)] [eta: 0:09:51, time (data): 0.154 (0.003)] l_mos: 3.9240e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.7611e-01 
+2025-02-26 11:52:14,344 INFO: [KonIQ..][epoch: 17, iter:  17,700, lr:(1.090e-05,)] [eta: 0:09:27, time (data): 0.154 (0.003)] l_mos: 3.9101e-04 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.8572e-01 
+2025-02-26 11:52:29,811 INFO: [KonIQ..][epoch: 17, iter:  17,800, lr:(1.090e-05,)] [eta: 0:09:03, time (data): 0.155 (0.003)] l_mos: 4.3950e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9581e-01 
+2025-02-26 11:52:45,287 INFO: [KonIQ..][epoch: 17, iter:  17,900, lr:(1.090e-05,)] [eta: 0:08:39, time (data): 0.155 (0.003)] l_mos: 5.4733e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.8925e-01 
+2025-02-26 11:53:00,773 INFO: [KonIQ..][epoch: 17, iter:  18,000, lr:(1.090e-05,)] [eta: 0:08:15, time (data): 0.155 (0.004)] l_mos: 1.2301e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.9864e-01 
+2025-02-26 11:53:00,774 INFO: Saving latest models and training states.
+2025-02-26 11:55:16,481 INFO: [KonIQ..][epoch: 17, iter:  18,100, lr:(1.090e-05,)] [eta: 0:08:05, time (data): 0.152 (0.003)] l_mos: 2.6044e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.9881e-01 
+2025-02-26 11:55:20,635 INFO: 1 validation datasets are used for validation.
+2025-02-26 11:57:12,274 INFO: Validation KonIQ10k
+	 # srcc: 0.9394	Best: 0.9454 @ 4028 iter
+	 # plcc: 0.9470	Best: 0.9516 @ 4028 iter
+
+2025-02-26 11:57:24,257 INFO: [KonIQ..][epoch: 18, iter:  18,200, lr:(4.894e-06,)] [eta: 0:07:53, time (data): 1.175 (1.023)] l_mos: 7.1359e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.7084e-01 
+2025-02-26 11:57:39,704 INFO: [KonIQ..][epoch: 18, iter:  18,300, lr:(4.894e-06,)] [eta: 0:07:28, time (data): 0.153 (0.003)] l_mos: 1.5231e-03 train_metrics/srcc: 9.3415e-01 train_metrics/plcc: 9.6475e-01 
+2025-02-26 11:57:56,672 INFO: [KonIQ..][epoch: 18, iter:  18,400, lr:(4.894e-06,)] [eta: 0:07:03, time (data): 0.168 (0.004)] l_mos: 3.6622e-04 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.8894e-01 
+2025-02-26 11:58:12,119 INFO: [KonIQ..][epoch: 18, iter:  18,500, lr:(4.894e-06,)] [eta: 0:06:38, time (data): 0.155 (0.003)] l_mos: 9.8366e-04 train_metrics/srcc: 8.8095e-01 train_metrics/plcc: 9.7177e-01 
+2025-02-26 11:58:27,745 INFO: [KonIQ..][epoch: 18, iter:  18,600, lr:(4.894e-06,)] [eta: 0:06:13, time (data): 0.156 (0.004)] l_mos: 6.7904e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.7385e-01 
+2025-02-26 11:58:43,233 INFO: [KonIQ..][epoch: 18, iter:  18,700, lr:(4.894e-06,)] [eta: 0:05:49, time (data): 0.154 (0.003)] l_mos: 1.9048e-03 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.2249e-01 
+2025-02-26 11:58:58,966 INFO: [KonIQ..][epoch: 18, iter:  18,800, lr:(4.894e-06,)] [eta: 0:05:24, time (data): 0.157 (0.003)] l_mos: 1.1913e-03 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.6916e-01 
+2025-02-26 11:59:14,518 INFO: [KonIQ..][epoch: 18, iter:  18,900, lr:(4.894e-06,)] [eta: 0:05:00, time (data): 0.156 (0.005)] l_mos: 4.8249e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.6405e-01 
+2025-02-26 11:59:29,928 INFO: [KonIQ..][epoch: 18, iter:  19,000, lr:(4.894e-06,)] [eta: 0:04:35, time (data): 0.154 (0.003)] l_mos: 6.1155e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.7758e-01 
+2025-02-26 11:59:29,929 INFO: Saving latest models and training states.
+2025-02-26 12:00:56,190 INFO: [KonIQ..][epoch: 18, iter:  19,100, lr:(4.894e-06,)] [eta: 0:04:15, time (data): 0.151 (0.003)] l_mos: 1.2756e-03 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.5206e-01 
+2025-02-26 12:01:12,015 INFO: [KonIQ..][epoch: 19, iter:  19,200, lr:(1.231e-06,)] [eta: 0:03:50, time (data): 0.158 (0.008)] l_mos: 1.3288e-04 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.9620e-01 
+2025-02-26 12:01:27,429 INFO: [KonIQ..][epoch: 19, iter:  19,300, lr:(1.231e-06,)] [eta: 0:03:26, time (data): 0.158 (0.007)] l_mos: 2.0924e-04 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.9258e-01 
+2025-02-26 12:01:42,783 INFO: [KonIQ..][epoch: 19, iter:  19,400, lr:(1.231e-06,)] [eta: 0:03:02, time (data): 0.154 (0.003)] l_mos: 6.1547e-04 train_metrics/srcc: 9.0476e-01 train_metrics/plcc: 9.9421e-01 
+2025-02-26 12:01:58,210 INFO: [KonIQ..][epoch: 19, iter:  19,500, lr:(1.231e-06,)] [eta: 0:02:37, time (data): 0.161 (0.007)] l_mos: 3.4170e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.9339e-01 
+2025-02-26 12:02:13,591 INFO: [KonIQ..][epoch: 19, iter:  19,600, lr:(1.231e-06,)] [eta: 0:02:13, time (data): 0.154 (0.003)] l_mos: 4.6260e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.8931e-01 
+2025-02-26 12:02:29,056 INFO: [KonIQ..][epoch: 19, iter:  19,700, lr:(1.231e-06,)] [eta: 0:01:49, time (data): 0.157 (0.002)] l_mos: 2.6133e-04 train_metrics/srcc: 9.7619e-01 train_metrics/plcc: 9.9066e-01 
+2025-02-26 12:02:44,519 INFO: [KonIQ..][epoch: 19, iter:  19,800, lr:(1.231e-06,)] [eta: 0:01:25, time (data): 0.155 (0.003)] l_mos: 5.4393e-04 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.9011e-01 
+2025-02-26 12:03:00,013 INFO: [KonIQ..][epoch: 19, iter:  19,900, lr:(1.231e-06,)] [eta: 0:01:01, time (data): 0.156 (0.002)] l_mos: 8.3547e-05 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9744e-01 
+2025-02-26 12:03:15,589 INFO: [KonIQ..][epoch: 19, iter:  20,000, lr:(1.231e-06,)] [eta: 0:00:37, time (data): 0.156 (0.004)] l_mos: 1.5705e-04 train_metrics/srcc: 9.5238e-01 train_metrics/plcc: 9.5649e-01 
+2025-02-26 12:03:15,589 INFO: Saving latest models and training states.
+2025-02-26 12:03:35,109 INFO: [KonIQ..][epoch: 19, iter:  20,100, lr:(1.231e-06,)] [eta: 0:00:13, time (data): 0.155 (0.003)] l_mos: 7.1240e-04 train_metrics/srcc: 1.0000e+00 train_metrics/plcc: 9.9832e-01 
+2025-02-26 12:03:41,372 INFO: 1 validation datasets are used for validation.
+2025-02-26 12:05:33,332 INFO: Validation KonIQ10k
+	 # srcc: 0.9396	Best: 0.9454 @ 4028 iter
+	 # plcc: 0.9464	Best: 0.9516 @ 4028 iter
+
+2025-02-26 12:05:36,885 INFO: End of training. Time consumed: 1:21:33
+2025-02-26 12:05:36,886 INFO: Save the latest model.
+2025-02-26 12:07:33,255 INFO: Validation KonIQ10k
+	 # srcc: 0.9382	Best: 0.9454 @ 4028 iter
+	 # plcc: 0.9460	Best: 0.9516 @ 4028 iter
+
