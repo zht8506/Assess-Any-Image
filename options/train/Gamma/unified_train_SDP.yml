@@ -1,0 +1,467 @@
+# general settings
+name: Unified_train_gamma_SDP
+
+model_type: GeneralIQAModel
+num_gpu: 1  # set num_gpu: 0 for cpu mode
+manual_seed: 123
+
+multi_dataset: true # when use unified training of multiple datasets, multi_dataset = true
+use_SDP: true
+
+# experiments_save_dir: experiments_gamma/unified_train
+
+# dataset and data loader settings
+datasets:
+  data_loader:
+    use_shuffle: true
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 8
+    dataset_enlarge_ratio: 1
+    prefetch_mode: ~
+
+  train_1:
+    name: KonIQ10k
+    type: GeneralNRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/koniq10k/512x384
+    meta_info_file: ./datasets/meta_info/meta_info_KonIQ10kDataset.csv
+    split_file: ./datasets/meta_info/koniq_10split.pkl
+    mos_range: [0, 100]
+    lower_better: false 
+    mos_normalize: true
+    split_index: 1 # default index
+
+    augment:
+      hflip: true
+      random_crop: 224
+    img_range: 1
+  
+  train_2:
+    name: LIVEC
+    type: LIVEChallengeDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/ChallengeDB_release/Images
+    meta_info_file: ./datasets/meta_info/meta_info_LIVEChallengeDataset.csv
+    split_file: ./datasets/meta_info/livec_10split.pkl
+    mos_range: [0, 100]
+    lower_better: false 
+    mos_normalize: true
+    split_index: 1 # default index
+
+    augment:
+      hflip: true
+      random_crop: 224
+    img_range: 1
+  
+  train_3:
+    name: KADID10k
+    type: GeneralFRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/kadid10k/images
+    meta_info_file: './datasets/meta_info/meta_info_KADID10kDataset.csv'
+    split_file: ./datasets/meta_info/kadid_10split.pkl
+    mos_range: [1, 5]
+    lower_better: false
+    mos_normalize: true
+    split_index: 1 # default index
+    nr_model: true # use FR Dataset as NR dataset for NR model
+
+    augment:
+      hflip: true
+      random_crop: 224
+    img_range: 1
+
+  train_4:
+    name: LIVE
+    type: GeneralFRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/databaserelease2
+    meta_info_file: ./datasets/meta_info/meta_info_LIVEIQADataset.csv
+    split_file: ./datasets/meta_info/live_10split.pkl
+    mos_range: [1, 100]
+    lower_better: true 
+    mos_normalize: true
+    split_index: 1 # default index
+    nr_model: true
+
+    augment:
+      hflip: true
+      random_crop: 224
+    img_range: 1
+  
+  train_5:
+    name: CSIQ
+    type: GeneralFRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/CSIQ/dst_imgs
+    dataroot_ref: /home/zht/zht/iqa_iaa_data/CSIQ/src_imgs
+    meta_info_file: ./datasets/meta_info/meta_info_CSIQDataset.csv
+    split_file: ./datasets/meta_info/csiq_10split.pkl
+    mos_range: [0, 1]
+    lower_better: true 
+    mos_normalize: true
+    split_index: 1 # default index
+    nr_model: true
+
+    augment:
+      hflip: true
+      random_crop: 224
+    img_range: 1
+  
+  train_6:
+    name: AGIQA3K
+    type: GeneralNRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/agiqa3k/image
+    meta_info_file: /home/zht/zht/iqa_iaa_data/agiqa3k/mos.csv
+    split_file: ./datasets/meta_info/agiqa3k_10split.pkl
+    mos_range: [0, 5]
+    lower_better: false 
+    mos_normalize: true
+    split_index: 1 # default index
+
+    augment:
+      hflip: true
+      random_crop: 224
+    img_range: 1
+
+  train_7:
+    name: UWIQA
+    type: GeneralNRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/UWIQA/Image
+    meta_info_file: /home/zht/zht/iqa_iaa_data/UWIQA/uwiqa_mos.csv
+    split_file: ./datasets/meta_info/uwiqa_10split.pkl
+    mos_range: [0, 1]
+    lower_better: false 
+    mos_normalize: true
+    split_index: 1 # default index
+
+    augment:
+      hflip: true
+      resize: 224 # resize short edge
+      random_crop: 224
+    img_range: 1
+
+  train_8:
+    name: GFIQA
+    type: GeneralNRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/GFIQA-20k/image
+    meta_info_file: ./datasets/meta_info/meta_info_GFIQADataset.csv
+    split_file: ./datasets/meta_info/gfiqa_10split.pkl
+    mos_range: [0, 1]
+    lower_better: false 
+    mos_normalize: true
+
+    augment:
+      hflip: true
+      random_crop: 224
+    img_range: 1
+
+  train_9:
+    name: SPAQ
+    type: GeneralNRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/spaq/384_oneside
+    meta_info_file: ./datasets/meta_info/meta_info_SPAQDataset.csv
+    split_file: ./datasets/meta_info/spaq_10split.pkl
+    mos_range: [0, 100]
+    lower_better: false 
+    mos_normalize: true
+
+    augment:
+      hflip: true
+      random_crop: 224
+    img_range: 1
+  
+  train_10:
+    name: TID2013
+    type: GeneralFRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/tid2013/distorted_images
+    dataroot_ref: /home/zht/zht/iqa_iaa_data/tid2013/reference_images
+    meta_info_file: ./datasets/meta_info/meta_info_TID2013Dataset.csv
+    split_file: ./datasets/meta_info/tid2013_10split.pkl
+    mos_range: [0, 9]
+    lower_better: false
+    mos_normalize: true
+    nr_model: true
+
+    augment:
+      hflip: true
+      random_crop: 224
+    img_range: 1
+
+  train_11:
+    name: AADB
+    type: GeneralNRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/aadb/image
+    meta_info_file: /home/zht/zht/iqa_iaa_data/aadb/aadb_mos.csv
+    split_file: ./datasets/meta_info/aadb_10split.pkl
+    mos_range: [0, 1]
+    lower_better: false
+    mos_normalize: true
+
+    augment:
+      hflip: true
+      random_crop: 224
+    img_range: 1
+
+  train_12:
+    name: AVA 
+    type: AVADataset 
+    dataroot_target: /home/zht/zht/iqa_iaa_data/ava/image_224_oneisde
+    meta_info_file: ./datasets/meta_info/meta_info_AVADataset_revise.csv
+    split_file: ./datasets/meta_info/ava_official_ilgnet_traintest_6w_10split.pkl
+    mos_range: [0,10]
+    lower_better: false
+    mos_normalize: true
+    nr_model: true
+    split_index: 1
+
+    augment:
+      hflip: true
+      resize: 224
+      random_crop: 224
+    img_range: 1
+
+  val_1:
+    name: KonIQ10k
+    type: GeneralNRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/koniq10k/512x384
+    meta_info_file: ./datasets/meta_info/meta_info_KonIQ10kDataset.csv
+    split_file: ./datasets/meta_info/koniq_10split.pkl
+    mos_range: [0, 100]
+    lower_better: false 
+    mos_normalize: true
+    split_index: 1 # default index
+
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 16
+  
+  val_2:
+    name: LIVEC
+    type: LIVEChallengeDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/ChallengeDB_release/Images
+    meta_info_file: ./datasets/meta_info/meta_info_LIVEChallengeDataset.csv
+    split_file: ./datasets/meta_info/livec_10split.pkl
+    mos_range: [0, 100]
+    lower_better: false
+    mos_normalize: true
+    split_index: 1 # default index
+
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 1
+
+  val_3:
+    name: KADID10k
+    type: GeneralFRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/kadid10k/images
+    meta_info_file: './datasets/meta_info/meta_info_KADID10kDataset.csv'
+    split_file: ./datasets/meta_info/kadid_10split.pkl
+    mos_range: [1, 5]
+    lower_better: false
+    mos_normalize: true
+    split_index: 1 # default index
+    nr_model: true
+
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 16
+  
+  val_4:
+    name: LIVE
+    type: GeneralFRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/databaserelease2
+    meta_info_file: './datasets/meta_info/meta_info_LIVEIQADataset.csv'
+    split_file: ./datasets/meta_info/live_10split.pkl
+    mos_range: [1, 100]
+    lower_better: true 
+    mos_normalize: true
+    split_index: 1 # default index
+    nr_model: true
+
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 1
+
+  val_5:
+    name: CSIQ
+    type: GeneralFRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/CSIQ/dst_imgs
+    dataroot_ref: /home/zht/zht/iqa_iaa_data/CSIQ/src_imgs
+    meta_info_file: ./datasets/meta_info/meta_info_CSIQDataset.csv
+    split_file: ./datasets/meta_info/csiq_10split.pkl
+    mos_range: [0, 1]
+    lower_better: true 
+    mos_normalize: true
+    split_index: 1 # default index
+    nr_model: true
+
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 1
+
+  val_6:
+    name: AGIQA3K
+    type: GeneralNRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/agiqa3k/image
+    meta_info_file: /home/zht/zht/iqa_iaa_data/agiqa3k/mos.csv
+    split_file: ./datasets/meta_info/agiqa3k_10split.pkl
+    mos_range: [0, 5]
+    lower_better: false 
+    mos_normalize: true
+    split_index: 1 # default index
+
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 8
+
+  val_7:
+    name: UWIQA
+    type: GeneralNRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/UWIQA/Image
+    meta_info_file: /home/zht/zht/iqa_iaa_data/UWIQA/uwiqa_mos.csv
+    split_file: ./datasets/meta_info/uwiqa_10split.pkl
+    mos_range: [0, 1]
+    lower_better: false 
+    mos_normalize: true
+    split_index: 1 # default index
+
+    augment:
+      resize: 224
+
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 1
+
+  val_8:
+    name: GFIQA
+    type: GeneralNRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/GFIQA-20k/image
+    meta_info_file: ./datasets/meta_info/meta_info_GFIQADataset.csv
+    split_file: ./datasets/meta_info/gfiqa_10split.pkl
+    mos_range: [0, 1]
+    lower_better: false 
+    mos_normalize: true
+
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 16
+  
+  val_9:
+    name: SPAQ
+    type: GeneralNRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/spaq/384_oneside
+    meta_info_file: ./datasets/meta_info/meta_info_SPAQDataset.csv
+    split_file: ./datasets/meta_info/spaq_10split.pkl
+    mos_range: [0, 100]
+    lower_better: false 
+    mos_normalize: true
+
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 1
+  
+  val_10:
+    name: TID2013
+    type: GeneralFRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/tid2013/distorted_images
+    dataroot_ref: /home/zht/zht/iqa_iaa_data/tid2013/reference_images
+    meta_info_file: ./datasets/meta_info/meta_info_TID2013Dataset.csv
+    split_file: ./datasets/meta_info/tid2013_10split.pkl
+    mos_range: [0, 9]
+    lower_better: false 
+    mos_normalize: true
+    nr_model: true
+
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 4
+
+  val_11:
+    name: AADB
+    type: GeneralNRDataset
+    dataroot_target: /home/zht/zht/iqa_iaa_data/aadb/image
+    meta_info_file: /home/zht/zht/iqa_iaa_data/aadb/aadb_mos.csv
+    split_file: ./datasets/meta_info/aadb_10split.pkl
+    mos_range: [0, 1]
+    lower_better: false
+    mos_normalize: true
+
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 4
+
+  val_12:
+    name: AVA 
+    type: AVADataset 
+    dataroot_target: /home/zht/zht/iqa_iaa_data/ava/image_224_oneisde
+    meta_info_file: ./datasets/meta_info/meta_info_AVADataset_revise.csv
+    split_file: ./datasets/meta_info/ava_official_ilgnet_traintest_6w_10split.pkl
+    mos_range: [0,10]
+    lower_better: false
+    mos_normalize: true
+    nr_model: true
+    split_index: 1
+
+    augment:
+      resize: 224
+
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 1
+  
+
+# network structures
+network:
+  type: Gamma_MoAE_SDP # set use_SDP: true
+  model_type: CLIP_Adapter_prompt
+  backbone: pretrained_weight/UniQA_weight.pt
+  pretrained: false
+  pos_embedding: true
+  sample_size: 224
+  clip_finetune: true
+  num_experts: 3 # the number of experts in adaptive experts
+  num_ft_layer: 6 # use MoAE in the last 6 layers of vision/text transformer
+
+# path
+path:
+  pretrain_network_g: ~
+  strict_load_g: true
+  resume_state: ~
+
+# training settings
+train:
+  optim:
+    type: Adam 
+    lr: !!float 2e-5
+    lr_clip_model: !!float 2e-5
+  
+  scheduler:
+    type: CosineAnnealingLR
+    T_max: 10
+    eta_min: 0
+
+  total_iter: 2000000
+  total_epoch: 10
+  warmup_iter: -1  # no warm up
+
+  # losses
+  mos_loss_opt:
+    type: MSELoss
+    loss_weight: !!float 1.0
+
+# validation settings
+val:
+  val_type: epoch
+  val_freq_epoch: 5 # eval every val_freq_epoch epochs
+  val_freq: !!float 2000
+  save_img: false
+  pbar: true
+
+  key_metric: srcc # if this metric improve, update all metrics. If not specified, each best metric results will be updated separately 
+  metrics:
+    srcc: 
+      type: calculate_srcc
+
+    plcc: 
+      type: calculate_plcc
+
+# logging settings
+logger:
+  print_freq: 100
+  save_latest_freq: !!float 1e4 
+  log_imgs_freq: 1000
+  use_tb_logger: true
+  wandb:
+    project: ~
+    resume_id: ~
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500
+
+find_unused_parameters: True
