@@ -67,6 +67,13 @@ Our Gamma can accurately evaluate images in different scenes.
 ## 📚  Citation
 Please cite our work if you find our work and codes helpful for your research.
 ```
+@article{zhou2025gamma,
+  title={Gamma: Toward Generic Image Assessment with Mixture of Assessment Experts},
+  author={Zhou, Hantao and Yang, Rui and Tang, Longxiang and Qin, Guanyi and Zhang, Yan and Hu, Runze and Li, Xiu},
+  journal={arXiv preprint arXiv:2503.06678},
+  year={2025}
+}
+
 @article{zhou2024uniqa,
   title={UniQA: Unified Vision-Language Pre-training for Image Quality and Aesthetic Assessment},
   author={Zhou, Hantao and Tang, Longxiang and Yang, Rui and Qin, Guanyi and Zhang, Yan and Hu, Runze and Li, Xiu},
