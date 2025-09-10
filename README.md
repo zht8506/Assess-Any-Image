@@ -1,5 +1,9 @@
 # Gamma: Toward Generic Image Assessment with Mixture of Assessment Experts [[paper](https://arxiv.org/pdf/2503.06678)]
 
+Authors: Hantao Zhou, Rui Yang, Longxiang Tang, Guanyi Qin, Runze Hu, Xiu Li
+
+Conference: ACMMM 2025
+
 ## :loudspeaker: Abstract
 
 Image assessment aims to evaluate the quality and aesthetics of images and has been applied across various scenarios, such as natural and AIGC scenes. Existing methods mostly address these sub-tasks or scenes individually. While some works attempt to develop unified image assessment models, they have struggled to achieve satisfactory performance or cover a broad spectrum of assessment scenarios. In this paper, we present Gamma, a Generic imAge assessMent model using Mixture of Assessment Experts, which can effectively assess images from diverse scenes through mixed-dataset training. Achieving unified training in image assessment presents significant challenges due to annotation biases across different datasets. To address this issue, we first propose a Mixture of Assessment Experts (MoAE) module, which employs shared and adaptive experts to dynamically learn common and specific knowledge for different datasets, respectively. In addition, we introduce a Scene-based Differential Prompt (SDP) strategy, which uses scene-specific prompts to provide prior knowledge and guidance during the learning process, further boosting adaptation for various scenes. Our Gamma model is trained and evaluated on 12 datasets spanning 6 image assessment scenarios. Extensive experiments show that our unified Gamma outperforms other state-of-the-art mixed-training methods by significant margins while covering more scenes.
